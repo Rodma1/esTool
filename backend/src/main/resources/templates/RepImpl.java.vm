@@ -1,0 +1,21 @@
+package ${package.ServiceImpl};
+
+import ${package.Mapper}.${table.mapperName};
+#set ($dtoname=$entity.replace("PO","BO"))
+#set ($voname=$entity.replace("PO","VO"))
+import ${package.Entity}.${entity};
+import ${package.Entity}.${dtoname};
+import ${package.Entity}.${voname};
+import org.springframework.stereotype.Service;
+import com.chen.common.config.mybatisplus.core.ServicePlusImpl;
+import ${package.Service}.${table.serviceName};
+
+/**
+ * @author: ${author}
+ * @date: ${date}
+ * @description: $!{table.comment} 业务层接口实现类
+ */
+@Service
+public class ${table.serviceImplName} extends ${superServiceImplClass}<${table.mapperName}, ${entity}, ${dtoname}> implements ${table.serviceName} {
+
+}

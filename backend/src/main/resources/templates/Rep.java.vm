@@ -1,0 +1,14 @@
+package ${package.Service};
+#set ($dtoname=$entity.replace("PO","BO"))
+#set ($voname=$entity.replace("PO","VO"))
+import ${package.Entity}.${entity};
+import ${package.Entity}.${dtoname};
+import com.chen.common.config.mybatisplus.core.IServicePlus;
+/**
+ * @author: ${author}
+ * @date: ${date}
+ * @description: $!{table.comment} 业务层接口
+ */
+public interface ${table.serviceName} extends ${superServiceClass}<${entity},${dtoname}> {
+
+}

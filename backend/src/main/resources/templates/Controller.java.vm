@@ -1,0 +1,57 @@
+package ${package.Controller};
+
+#if(${restControllerStyle})
+import org.springframework.web.bind.annotation.RestController;
+#else
+import org.springframework.stereotype.Controller;
+#end
+import org.springframework.web.bind.annotation.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+#set ($controllerName=$table.comment.replace("表",""))
+/**
+ * @author: ${author}
+ * @date: ${date}
+ * @description: ${controllerName}Controller
+ */
+#if(${restControllerStyle})
+@RestController
+#else
+@Controller
+#end
+@Api(value = "${controllerName}接口控制器", tags = "${controllerName}")
+@RequestMapping("#if(${package.ModuleName})/${package.ModuleName}#end/#if(${controllerMappingHyphenStyle})${controllerMappingHyphen}#else${table.entityPath}#end")
+public class ${table.controllerName} {
+
+    @ApiOperation(value = "分页查询${controllerName}")
+    @GetMapping(value = "/pages")
+    public ResultData pages() {
+        return ResultData.success();
+    }
+
+    @ApiOperation(value = "查询${controllerName}")
+    @GetMapping(value = "/query")
+    public ResultData query() {
+        return ResultData.success();
+    }
+
+    @ApiOperation(value = "新增${controllerName}")
+    @PostMapping(value = "/insert")
+    public ResultData insert() {
+        return ResultData.success();
+    }
+
+    @ApiOperation(value = "删除${controllerName}")
+    @DeleteMapping(value = "/delete")
+    public ResultData delete() {
+        return ResultData.success();
+    }
+
+    @ApiOperation(value = "更新${controllerName}")
+    @PutMapping(value = "/update")
+    public ResultData update() {
+        return ResultData.success();
+    }
+}
+
