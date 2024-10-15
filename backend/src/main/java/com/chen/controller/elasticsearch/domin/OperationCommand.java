@@ -2,6 +2,7 @@ package com.chen.controller.elasticsearch.domin;
 
 import com.chen.domain.elsaticsearch.ElasticsearchTimeSearch;
 import com.chen.domain.elsaticsearch.SearchFields;
+import com.chen.domain.elsaticsearch.UpdateFields;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -87,4 +88,7 @@ public class OperationCommand {
 
     @ApiModelProperty("时间查询")
     public ElasticsearchTimeSearch timeSearch;
+
+    @ApiModelProperty("更新字段")
+    public List<UpdateFields> updateFields;
 }

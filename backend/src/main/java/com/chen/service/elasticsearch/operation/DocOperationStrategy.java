@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -52,6 +51,8 @@ public class DocOperationStrategy implements ElasticsearchOperationStrategy {
                         , factoryParam.getSearchFields(), factoryParam.getTimeSearch());
             case "COUNT":
                 return this.getDocumentCount(client, factoryParam.getIndices());
+            case "UPDATE":
+                return this.updateByQuery(client, factoryParam.getDocumentIds(), factoryParam.getIndices(), factoryParam.getUpdateFields());
             default:
                 return null;
         }
@@ -181,6 +182,33 @@ public class DocOperationStrategy implements ElasticsearchOperationStrategy {
             return client.count(c -> c.index(indices)).count();
         }
         return client.count().count();
+    }
+
+    /**
+     * 批量更新文档
+     */
+    public Object updateByQuery(ElasticsearchClient client, List<String> documentIds, List<String> indices, List<UpdateFields> updateFields) throws IOException {
+        if (ObjectUtil.isNotNull(documentIds) && !documentIds.isEmpty() && ObjectUtil.isNotNull(indices) && !indices.isEmpty() && ObjectUtil.isNotNull(updateFields) && !updateFields.isEmpty() ) {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for (UpdateFields updateField : updateFields) {
+                Object value = updateField.getValue();
+                stringBuilder.append("ctx._source.")
+                        .append(updateField.getKey())
+                        .append(" = ");
+
+                if (value instanceof String) {
+                    stringBuilder.append("'").append(value).append("'");
+                } else {
+                    stringBuilder.append(value);
+                }
+
+                stringBuilder.append("; ");
+            }
+            UpdateByQueryResponse updateByQueryResponse = client.updateByQuery(u -> u.index(indices).query(q -> q.ids(i -> i.values(documentIds))).script(s -> s.inline(i -> i.source(stringBuilder.toString()))));
+            return updateByQueryResponse.toString();
+        }
+        return true;
     }
 
 

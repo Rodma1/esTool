@@ -1,21 +1,9 @@
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.core.InfoResponse;
-import co.elastic.clients.elasticsearch.indices.PutAliasRequest;
-import co.elastic.clients.elasticsearch.indices.PutAliasResponse;
-import com.chen.ChenApplication;
-import com.chen.common.config.elasticsearch.ElasticsearchClientConfig;
-import com.chen.domain.elsaticsearch.ElasticsearchConnectParam;
-import com.chen.service.HelloWord;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author: 神的孩子都在歌唱
  * @date: 2023/10/20 14:58

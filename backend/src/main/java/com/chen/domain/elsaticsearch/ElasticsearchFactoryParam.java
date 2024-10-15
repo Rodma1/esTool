@@ -71,6 +71,9 @@ public class ElasticsearchFactoryParam implements Serializable {
 
     @ApiModelProperty("时间查询")
     public ElasticsearchTimeSearch timeSearch;
+
+    @ApiModelProperty("更新字段")
+    public List<UpdateFields> updateFields;
     public ElasticsearchFactoryParam(List<String> indies) {
         this.indices = indies;
     }
