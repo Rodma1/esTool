@@ -23,7 +23,20 @@
                     <el-button @click="stopTask(scope.row)" type="text" size="medium">停止任务</el-button>
                 </template>
             </el-table-column>
+            <el-table-column fixed="right" label="操作">
+                <template slot-scope="scope">
+                    <el-button @click="taskInfo(scope.row)" type="text" size="medium">查看详情</el-button>
+                </template>
+            </el-table-column>
         </el-table>
+        <!-- 右侧滑出的抽屉 -->
+        <el-drawer
+            title="任务详情"
+            :visible.sync="drawerVisible"
+            direction="rtl"
+            size="30%">
+            <pre>{{ formattedInfo }}</pre>
+        </el-drawer>
     </div>
 </template>
 
@@ -37,10 +50,16 @@ export default {
             tableData: [],
             multipleSelection: [],
             operationCategory: "TASK",
-            dialogVisible: false,
+            drawerVisible: false,
+            info: {}
         }
     },
-
+    computed: {
+        // 格式化 JSON 数据以便在弹窗中展示
+        formattedInfo() {
+            return JSON.stringify(this.info, null, 2);
+        }
+    },
     methods: {
         handleSelectionChange(val) {
             this.multipleSelection = [];
@@ -75,25 +94,7 @@ export default {
 
 
         },
-        async updateAliasWriteIndex(row) {
 
-            try {
-                const params = this.getParams("WRITE_INDEX")
-                params.indexName = row.index
-                params.alias = row.alias
-                const response = await this.axios.post('/api/elasticsearch/operation', params);
-                this.$message({
-                    message: response.data.message,
-                    type: 'success'
-                });
-                this.refreshList()
-            } catch (error) {
-                console.log(error)
-            }
-
-            // 表单验证和提交逻辑
-            this.dialogVisible = false;
-        },
         stopTask(row) {
             console.log(row)
             this.$confirm('此操作将取消任务 是否继续?', '提示', {
@@ -114,6 +115,22 @@ export default {
                 console.log(error)
             });
         },
+        async taskInfo(row) {
+            // 假设使用axios发起请求获取数据
+
+            try {
+                const params = this.getParams("INFO")
+                params.taskId = row.task_id
+                const response = await this.axios.post('/api/elasticsearch/operation', params);
+                this.info = response.data.data
+                this.drawerVisible = true;  // 打开弹窗
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        handleDialogClose() {
+            this.info = {};  // 清空 info 数据
+        }
     },
     // mounted() {
     //     this.refreshList()

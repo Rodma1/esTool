@@ -3,6 +3,8 @@ package com.chen.service.elasticsearch.operation;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.cat.tasks.TasksRecord;
 import co.elastic.clients.elasticsearch.tasks.CancelResponse;
+import co.elastic.clients.elasticsearch.tasks.GetTasksResponse;
+import co.elastic.clients.elasticsearch.tasks.TaskInfo;
 import com.chen.common.exception.ServiceException;
 import com.chen.common.utils.json.FastJsonUtils;
 import com.chen.domain.elsaticsearch.ElasticsearchFactoryParam;
@@ -32,6 +34,8 @@ public class TaskOperationStrategy implements ElasticsearchOperationStrategy {
                 return this.taskList(elasticsearchClient);
             case "PUT":
                 return this.stopTask(elasticsearchClient, factoryParam.getTaskId());
+            case "INFO":
+                return this.taskInfo(elasticsearchClient, factoryParam.getTaskId());
             default:
                 return null;
         }
@@ -59,6 +63,23 @@ public class TaskOperationStrategy implements ElasticsearchOperationStrategy {
             return cancel.tasks();
         } catch (Exception e) {
             throw  new ServiceException("停止任务失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 查看任务详情
+     */
+    public Object taskInfo(ElasticsearchClient client, String taskId) {
+        try {
+            if (taskId == null) {
+                throw new ServiceException("任务Id不能为空");
+            }
+            GetTasksResponse getTasksResponse = client.tasks().get(c -> c.taskId(taskId));
+            String className = getTasksResponse.getClass().getSimpleName() + ": ";
+            String replace = getTasksResponse.toString().replace(className, "");
+            return FastJsonUtils.toObject(replace);
+        } catch (Exception e) {
+            throw  new ServiceException("获取任务详情失败：" + e.getMessage());
         }
     }
 }
