@@ -6,6 +6,7 @@
                 <el-button @click="refreshList">查询</el-button>
                 <el-button type="danger" @click="batchDelete">批量删除</el-button>
                 <el-button type="primary" @click="showCreateDialog">创建 JSON 数据</el-button>
+                <el-button type="primary" @click="batchUpdate">批量更新</el-button>
             </div>
             <div style="display: flex; align-items: center; margin-bottom: 10px;">
 
@@ -52,11 +53,29 @@
                     style="display: flex; align-items: center; flex-wrap: nowrap;"
                 >
                     <el-input style=" max-width: 150px;" v-model="domain.key"></el-input>
-                    <el-input style="margin-right: 5px; max-width: 150px;" v-model="domain.value"></el-input>
+                    <el-input style="margin-right: 5px; max-width: 150px;" v-model="domain.value" ></el-input>
                     <el-button @click.prevent="removeDomain(domain)" style="white-space: nowrap;">删除</el-button>
                 </el-form-item>
                 <el-form-item>
                     <el-button @click="addDomain">新增查询字段</el-button>
+                </el-form-item>
+            </el-form>
+
+            <el-form :model="updateFields">
+                <el-form-item
+                    v-for="(domain, index) in updateFields"
+                    :label="'字段' + index"
+                    :key="'字段' + index"
+                    :prop="'domains.' + index + '.value'"
+                    :rules="{ required: true, message: '字段不能为空', trigger: 'blur' }"
+                    style="display: flex; align-items: center; flex-wrap: nowrap;"
+                >
+                    <el-input style=" max-width: 150px;" v-model="domain.key"></el-input>
+                    <el-input style="margin-right: 5px; max-width: 150px;" v-model.number="domain.value"></el-input>
+                    <el-button @click.prevent="removeUpdateDomain(domain)" style="white-space: nowrap;">删除</el-button>
+                </el-form-item>
+                <el-form-item>
+                    <el-button @click="addUpdateDomain">新增更新字段</el-button>
                 </el-form-item>
             </el-form>
 
@@ -117,6 +136,7 @@ export default {
             sortOrder: '',
             sortField: '',
             searchFields: [],
+            updateFields: [],
             searchCount: 0,
             timeSearch: {
                 times: [],
@@ -270,6 +290,38 @@ export default {
 
 
         },
+        /**
+         * 批量更新文档
+         */
+        async batchUpdate() {
+
+            // console.log(this.selectedItems)
+            // this.jsonData = this.jsonData.filter(item => !this.selectedItems.includes(item.id));
+
+            this.$confirm('此操作将更新勾选的索引文档, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(async () => {
+
+                const params = this.getParams("UPDATE")
+                params.documentIds = this.selectedItems
+                params.indices = this.indexNames
+                params.updateFields = this.updateFields
+                const response = await this.axios.post('/api/elasticsearch/operation', params);
+                this.selectedItems = [];
+                this.refreshList()
+                this.$message({
+                    message: response.data.message,
+                    type: 'success'
+                });
+            }).catch((error) => {
+                console.log(error)
+            });
+
+
+
+        },
         // 获取总数
         async getDocumentCount() {
             const params = this.getParams("COUNT")
@@ -294,8 +346,17 @@ export default {
                 this.searchFields.splice(index, 1)
             }
         },
+        removeUpdateDomain(item) {
+            const index = this.updateFields.indexOf(item);
+            if (index !== -1) {
+                this.updateFields.splice(index, 1)
+            }
+        },
         addDomain() {
             this.searchFields.push({key: '', value: ''});
+        },
+        addUpdateDomain() {
+            this.updateFields.push({key: null, value: null});
         }
     },
 
