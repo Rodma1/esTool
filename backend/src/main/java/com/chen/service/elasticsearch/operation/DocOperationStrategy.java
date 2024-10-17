@@ -50,7 +50,7 @@ public class DocOperationStrategy implements ElasticsearchOperationStrategy {
                         , factoryParam.getPageSize(), factoryParam.getSortField(), factoryParam.getSortOrder()
                         , factoryParam.getSearchFields(), factoryParam.getTimeSearch());
             case "COUNT":
-                return this.getDocumentCount(client, factoryParam.getIndices());
+                return this.getDocumentCount(client);
             case "UPDATE":
                 return this.updateByQuery(client, factoryParam.getDocumentIds(), factoryParam.getIndices(), factoryParam.getUpdateFields());
             default:
@@ -177,10 +177,7 @@ public class DocOperationStrategy implements ElasticsearchOperationStrategy {
     /**
      * 获取文档数
      */
-    public Object getDocumentCount(ElasticsearchClient client, List<String> indices) throws IOException {
-        if (ObjectUtil.isNotNull(indices) && !indices.isEmpty()) {
-            return client.count(c -> c.index(indices)).count();
-        }
+    public Object getDocumentCount(ElasticsearchClient client) throws IOException {
         return client.count().count();
     }
 
