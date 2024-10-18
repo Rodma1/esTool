@@ -1,14 +1,24 @@
 package com.chen.common.utils.json;
 
+import co.elastic.clients.json.JsonpSerializable;
+import co.elastic.clients.json.JsonpUtils;
+import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimpleDateFormatSerializer;
+import jakarta.json.spi.JsonProvider;
+import jakarta.json.stream.JsonGenerator;
 
+import java.io.Serializable;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -18,6 +28,9 @@ import java.util.Map;
  */
 public class FastJsonUtils {
     private static SerializeConfig config;
+
+    private static final JacksonJsonpMapper JSONP_MAPPER = new JacksonJsonpMapper();
+    private static final JsonProvider PROVIDER = JsonpUtils.provider();
     private static SerializerFeature[] features = {
         //输出空值字段
         SerializerFeature.WriteMapNullValue,
@@ -105,6 +118,16 @@ public class FastJsonUtils {
         return JSONObject.toJSONString(object);
     }
 
+    public static <T extends JsonpSerializable> Object convertToHashMapList(List<T> items) {
+        return items.stream().map(FastJsonUtils::convertToHashMap).collect(Collectors.toList());
+    }
 
+    public static <T extends JsonpSerializable> Object convertToHashMap(T item) {
+        StringWriter sw = new StringWriter();
+        JsonGenerator generator = PROVIDER.createGenerator(sw);
+        item.serialize(generator, JSONP_MAPPER);
+        generator.close();
+        return JSONP_MAPPER.deserialize(JSONP_MAPPER.jsonProvider().createParser(new StringReader(sw.toString())), HashMap.class);
+    }
 }
 

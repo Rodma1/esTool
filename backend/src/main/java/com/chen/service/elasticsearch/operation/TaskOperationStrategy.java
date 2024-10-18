@@ -4,17 +4,12 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.cat.tasks.TasksRecord;
 import co.elastic.clients.elasticsearch.tasks.CancelResponse;
 import co.elastic.clients.elasticsearch.tasks.GetTasksResponse;
-import co.elastic.clients.elasticsearch.tasks.TaskInfo;
 import com.chen.common.exception.ServiceException;
 import com.chen.common.utils.json.FastJsonUtils;
 import com.chen.domain.elsaticsearch.ElasticsearchFactoryParam;
 import com.chen.service.elasticsearch.impl.ElasticsearchOperationStrategy;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -43,15 +38,8 @@ public class TaskOperationStrategy implements ElasticsearchOperationStrategy {
 
 
     public Object taskList(ElasticsearchClient client) throws IOException {
-        List<Object> hashMaps = new ArrayList<>();
         List<TasksRecord> tasksRecords = client.cat().tasks().valueBody();
-        tasksRecords.forEach(item->  {
-            String className = item.getClass().getSimpleName() + ": ";
-            String replace = item.toString().replace(className, "");
-            hashMaps.add(FastJsonUtils.toObject(replace));
-        });
-
-        return hashMaps;
+        return FastJsonUtils.convertToHashMapList(tasksRecords);
     }
 
     public Object stopTask(ElasticsearchClient client, String taskId) {
@@ -75,9 +63,7 @@ public class TaskOperationStrategy implements ElasticsearchOperationStrategy {
                 throw new ServiceException("任务Id不能为空");
             }
             GetTasksResponse getTasksResponse = client.tasks().get(c -> c.taskId(taskId));
-            String className = getTasksResponse.getClass().getSimpleName() + ": ";
-            String replace = getTasksResponse.toString().replace(className, "");
-            return FastJsonUtils.toObject(replace);
+            return FastJsonUtils.convertToHashMap(getTasksResponse);
         } catch (Exception e) {
             throw  new ServiceException("获取任务详情失败：" + e.getMessage());
         }
