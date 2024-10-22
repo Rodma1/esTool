@@ -30,7 +30,7 @@ public class FastJsonUtils {
     private static SerializeConfig config;
 
     private static final JacksonJsonpMapper JSONP_MAPPER = new JacksonJsonpMapper();
-    private static final JsonProvider PROVIDER = JsonpUtils.provider();
+    private static final JsonProvider PROVIDER =  JSONP_MAPPER.jsonProvider();
     private static SerializerFeature[] features = {
         //输出空值字段
         SerializerFeature.WriteMapNullValue,

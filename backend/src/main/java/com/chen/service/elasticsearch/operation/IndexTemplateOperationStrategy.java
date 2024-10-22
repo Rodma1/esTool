@@ -79,11 +79,9 @@ public class IndexTemplateOperationStrategy implements ElasticsearchOperationStr
      * 查询模板详情
      */
     public Object getTemplateInfo(ElasticsearchClient client, String indexTemplate) throws IOException {
-
         IndexTemplateItem indexTemplateItem = client.indices().getIndexTemplate(t -> t.name(indexTemplate)).indexTemplates().get(0);
-        String className = indexTemplateItem.getClass().getSimpleName() + ": ";
-        String replace = indexTemplateItem.toString().replace(className, "");
-        return FastJsonUtils.toObject(replace);
+        return FastJsonUtils.convertToHashMap(indexTemplateItem);
+
     }
 
     /**
