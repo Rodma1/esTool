@@ -25,7 +25,7 @@ public class AnalyzeOperationStrategy  implements ElasticsearchOperationStrategy
             case "ANALYZERS":
                 return this.analyzers();
             case "ANALYZE":
-                return this.analyze(elasticsearchClient, factoryParam.getIndexName(), factoryParam.getAnalyzer(), factoryParam.getDocument());
+                return this.analyze(elasticsearchClient, factoryParam.getIndexName(), factoryParam.getAnalyzer(), factoryParam.getDocument(), factoryParam.getField());
         }
         return null;
     }
@@ -53,9 +53,12 @@ public class AnalyzeOperationStrategy  implements ElasticsearchOperationStrategy
     /**
      * 分词器分词
      */
-    public Object analyze(ElasticsearchClient client, String index, String analyzer, String text) throws IOException {
+    public Object analyze(ElasticsearchClient client, String index, String analyzer, String text, String field) throws IOException {
         if (StringUtils.isBlank(index)) {
             return FastJsonUtils.convertToHashMapList(client.indices().analyze(a -> a.analyzer(analyzer).text(text)).tokens());
+        }
+        if (StringUtils.isNotBlank(field) && StringUtils.isNotBlank(index)) {
+            return FastJsonUtils.convertToHashMapList(client.indices().analyze(a -> a.index(index).field(field).analyzer(analyzer).text(text)).tokens());
         }
         return FastJsonUtils.convertToHashMapList(client.indices().analyze(a -> a.index(index).analyzer(analyzer).text(text)).tokens());
     }
