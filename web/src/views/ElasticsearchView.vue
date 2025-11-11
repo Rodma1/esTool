@@ -60,7 +60,7 @@
             <el-tab-pane label="别名操作" name="third"><AliasesView :connectParam="form"/></el-tab-pane>
             <el-tab-pane label="模板列表" name="fourth"><TemplateView :connectParam="form"></TemplateView></el-tab-pane>
             <el-tab-pane label="任务列表" name="fifty"><TaskView :connectParam="form"></TaskView></el-tab-pane>
-
+            <el-tab-pane label="分析器" name="sixth"><AnalyzeView :connectParam="form"></AnalyzeView></el-tab-pane>
         </el-tabs>
 
 
@@ -73,9 +73,10 @@ import DocumentView from "./elasticsearch/DocumentView.vue"
 import AliasesView from "./elasticsearch/AliasesView.vue"
 import TemplateView from "./elasticsearch/TemplateView.vue"
 import TaskView from "@/views/elasticsearch/TaskView.vue";
+import AnalyzeView from "@/views/elasticsearch/AnalyzeView.vue";
 
 export default {
-    components: {TaskView, ElasticIndicesView, DocumentView, AliasesView, TemplateView },
+    components: {TaskView, ElasticIndicesView, DocumentView, AliasesView, TemplateView , AnalyzeView},
     data() {
         return {
             form: {

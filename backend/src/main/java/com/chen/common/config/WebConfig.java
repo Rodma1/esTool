@@ -10,9 +10,10 @@ public class WebConfig  implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        //跨域配置，不可设置为*，不安全, 前后端分离项目，可能域名不一致
-        //本地测试 端口不一致 也算跨域
-        registry.addMapping("/**").allowedOrigins("http://localhost")
-                .allowedOrigins("**").allowedMethods("GET", "POST");;
+        registry.addMapping("/**")
+                .allowedOriginPatterns("*")  // ← 允许所有来源，包括 IP 和域名
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")         // 允许所有请求头
+                .allowCredentials(true);     // 如果有登录状态或cookie，需要这一行
     }
 }

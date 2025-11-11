@@ -91,4 +91,7 @@ public class OperationCommand {
 
     @ApiModelProperty("更新字段")
     public List<UpdateFields> updateFields;
+
+    @ApiModelProperty("分析器")
+    public String analyzer;
 }
