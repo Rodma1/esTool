@@ -29,7 +29,6 @@ public class ChenApplication {
     public static void main(String[] args)
     {
 //        SpringApplication.run(ChenApplication.class, args);
-        //SpringApplication.run(DemoApplication.class, args);
         new SpringApplicationBuilder(ChenApplication .class)
                 .beanNameGenerator(new ProGuardBeanNameGenerator()).run();
         System.out.println("启动成功");

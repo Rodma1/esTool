@@ -3,11 +3,13 @@ package com.chen.common.config.elasticsearch;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
+import co.elastic.clients.transport.TransportOptions;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.chen.domain.elsaticsearch.ElasticsearchConnectParam;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -101,17 +104,27 @@ public class ElasticsearchClientConfig {
         // 包含了账号密码
         RestClientBuilder.HttpClientConfigCallback callback = httpAsyncClientBuilder -> httpAsyncClientBuilder
                 .setDefaultCredentialsProvider(credentialsProvider)
-                .setMaxConnTotal(100) // 设置最大连接数
-                .setMaxConnPerRoute(10) // 每个路由的最大连接数
+                .setMaxConnTotal(100)
+                .setMaxConnPerRoute(10)
                 .setSSLContext(sslContext)
-                .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
+                .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                //  加上这个拦截器，补上 X-Elastic-Product 头
+                .addInterceptorLast((HttpResponseInterceptor) (response, context) -> {
+                    if (!response.containsHeader("X-Elastic-Product")) {
+                        response.addHeader("X-Elastic-Product", "Elasticsearch");
+                    }
+                });
 
-        // 用builder创建RestClient对象
-        RestClient client = RestClient.builder(hosts).setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder
-                        .setConnectTimeout(connectionTimeout)  // 设置连接超时时间为5秒
-                        .setSocketTimeout(readTimeout)) // 设置读取超时时间为60秒
-                .setHttpClientConfigCallback(callback)
-                .build();
+        RestClientBuilder builder = RestClient.builder(hosts)
+                .setDefaultHeaders(new org.apache.http.Header[]{
+                        new org.apache.http.message.BasicHeader("Content-Type", "application/json")
+                })
+                .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder
+                        .setConnectTimeout(connectionTimeout)
+                        .setSocketTimeout(readTimeout))
+                .setHttpClientConfigCallback(callback);
+
+        RestClient client = builder.build();
 
         return new RestClientTransport(client, new JacksonJsonpMapper());
     }
