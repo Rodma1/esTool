@@ -2,9 +2,15 @@
     <div>
         <!-- 输入文本框和选择分词器 -->
         <el-form :model="formData" label-width="80px">
-            <el-form-item label="索引名">
-                <el-input v-model="formData.indexName" placeholder="请输入索引名"></el-input>
-            </el-form-item>
+            <!--           输入 字段-->
+            <div>
+                <el-form-item label="索引名">
+                    <el-input v-model="formData.indexName" placeholder="请输入索引名"></el-input>
+                </el-form-item>
+                <el-form-item label="字段">
+                    <el-input v-model="formData.filed" placeholder="请输入字段名"></el-input>
+                </el-form-item>
+            </div>
 
             <el-form-item label="分词器">
                 <el-select v-model="formData.analyzer" placeholder="请选择分词器">
@@ -56,7 +62,8 @@ export default {
             formData: {
                 indexName: '',  // 索引名
                 analyzer: '',  // 分词器，初始化为空，后续从接口获取
-                document: ''  // 输入文本
+                document: '',  // 输入文本
+                filed: ''
             },
             analyzers: [],  // 分词器列表
             analysisResult: [],  // 存放分词结果
@@ -74,23 +81,25 @@ export default {
             params.operationType = operationType;
             return params;
         },
+        // 切换分词器列表显示并刷新接口
+        async toggleAnalyzerList() {
+            this.isAnalyzerListVisible = !this.isAnalyzerListVisible;
 
-        // 获取分词器列表
-        async fetchAnalyzers() {
-            this.errorMessage = '';  // 清除之前的错误信息
-            try {
-                // 获取请求参数
-                const params = this.getParams("PLUGINS");
+            if (this.isAnalyzerListVisible) { // 只有显示时才刷新
+                this.errorMessage = '';  // 清除之前错误
+                try {
+                    const params = this.getParams("PLUGINS");
+                    const response = await this.axios.post('/api/elasticsearch/operation', params);
 
-                // 请求后端接口获取分词器列表
-                const response = await this.axios.post('/api/elasticsearch/operation', params);
+                    // 假设返回的数据在 response.data.data
+                    this.analyzers = Array.isArray(response.data.data)
+                        ? [...response.data.data]
+                        : [...Object.keys(response.data.data)];
 
-                // 假设返回的分词器列表在 response.data.data 中
-                this.analyzers = response.data.data;
-
-            } catch (error) {
-                this.errorMessage = '无法获取分词器列表。';
-                console.error(error);
+                } catch (error) {
+                    this.errorMessage = '无法获取分词器列表。';
+                    console.error(error);
+                }
             }
         },
         // 获取分词器操作列表
@@ -116,10 +125,7 @@ export default {
 
         },
 
-        // 切换分词器列表的显示和隐藏
-        toggleAnalyzerList() {
-            this.isAnalyzerListVisible = !this.isAnalyzerListVisible;
-        },
+
 
         // 分词操作
         async analyzeText() {
@@ -132,6 +138,7 @@ export default {
                 params.indexName = this.formData.indexName
                 params.document = this.formData.document
                 params.analyzer = this.formData.analyzer
+                params.field = this.formData.filed
 
                 // 发送请求到后端
                 const response = await this.axios.post('/api/elasticsearch/operation', params);
@@ -145,7 +152,7 @@ export default {
 
     // 页面加载时获取分词器列表
     mounted() {
-        this.fetchAnalyzers();  // 获取分词器列表
+        // this.fetchAnalyzers();  // 获取分词器列表
         this.fetchAnalyzerOperations();
     }
 };

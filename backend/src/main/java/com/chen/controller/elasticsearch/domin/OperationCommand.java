@@ -94,4 +94,7 @@ public class OperationCommand {
 
     @ApiModelProperty("分析器")
     public String analyzer;
+
+    @ApiModelProperty("字段")
+    public String field;
 }

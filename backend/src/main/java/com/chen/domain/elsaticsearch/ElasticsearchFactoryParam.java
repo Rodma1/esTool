@@ -78,6 +78,9 @@ public class ElasticsearchFactoryParam implements Serializable {
     @ApiModelProperty("分析器")
     public String analyzer;
 
+    @ApiModelProperty("字段")
+    public String field;
+
 
     public ElasticsearchFactoryParam(List<String> indies) {
         this.indices = indies;
