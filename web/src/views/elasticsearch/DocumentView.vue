@@ -11,7 +11,7 @@
             <div style="display: flex; align-items: center; margin-bottom: 10px;">
 
             <el-input style="flex: 1; margin-right: 10px;" v-model="documentId" placeholder="根据文章Id查询"></el-input>
-                <el-select v-model="indices" multiple placeholder="查询的索引" style="flex: 1;">
+                <el-select v-model="indices"  filterable multiple placeholder="查询的索引" style="flex: 1;">
                     <el-option v-for="item in indexNames" :key="item" :label="item" :value="item"></el-option>
                 </el-select>
             </div>

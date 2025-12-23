@@ -3,14 +3,27 @@
         <!-- 输入文本框和选择分词器 -->
         <el-form :model="formData" label-width="80px">
             <!--           输入 字段-->
-            <div>
-                <el-form-item label="索引名">
-                    <el-input v-model="formData.indexName" placeholder="请输入索引名"></el-input>
-                </el-form-item>
-                <el-form-item label="字段">
-                    <el-input v-model="formData.filed" placeholder="请输入字段名"></el-input>
-                </el-form-item>
-            </div>
+<!--            将索引名和字段放在一行-->
+            <el-row>
+                <el-col :span="5">
+                    <el-form-item label="索引名">
+<!--                        <el-input v-model="formData.indexName" placeholder="请输入索引名"></el-input>-->
+                        <el-select v-model="formData.indexName"  filterable clearable  placeholder="查询的索引" style="flex: 1;">
+                            <el-option v-for="item in indexNames" :key="item" :label="item" :value="item"></el-option>
+                        </el-select>
+                        <el-button type="text" size="small" @click="getIndexNames" style="margin-top: 10px;">
+                            刷新索引名
+                        </el-button>
+                    </el-form-item>
+
+                </el-col>
+
+                <el-col :span="5">
+                    <el-form-item label="字段">
+                        <el-input v-model="formData.filed" placeholder="请输入字段名"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
 
             <el-form-item label="分词器">
                 <el-select v-model="formData.analyzer" placeholder="请选择分词器">
@@ -70,7 +83,9 @@ export default {
             operationCategory: "ANALYZE",
             errorMessage: '',  // 错误信息
             isAnalyzerListVisible: false,  // 控制分词器列表显示与隐藏
-            analyzersMap: {}
+            analyzersMap: {},
+            indices:[],
+            indexNames: []
         };
     },
     methods: {
@@ -80,6 +95,17 @@ export default {
             params.operationCategory = this.operationCategory;
             params.operationType = operationType;
             return params;
+        },
+        async getIndexNames() {
+            const params = this.getParams("INDEX_LIST")
+            params.operationCategory = "INDEX"
+            const response = await this.axios.post('/api/elasticsearch/operation', params);
+            const values = response.data.data
+            const indexNames = []
+            values.forEach(item => {
+                indexNames.push(item.index)
+            })
+            this.indexNames = indexNames;
         },
         // 切换分词器列表显示并刷新接口
         async toggleAnalyzerList() {
@@ -154,6 +180,7 @@ export default {
     mounted() {
         // this.fetchAnalyzers();  // 获取分词器列表
         this.fetchAnalyzerOperations();
+        this.getIndexNames()
     }
 };
 </script>
