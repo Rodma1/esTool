@@ -26,7 +26,7 @@
             </el-row>
 
             <el-form-item label="分词器">
-                <el-select v-model="formData.analyzer" placeholder="请选择分词器">
+                <el-select v-model="formData.analyzer" filterable clearable  placeholder="请选择分词器">
                     <el-option v-for="(item, index) in analyzersMap" :key="index" :label="item" :value="item"></el-option>
                 </el-select>
                 <el-button type="text" size="small" @click="fetchAnalyzerOperations" style="margin-top: 10px;">

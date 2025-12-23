@@ -57,8 +57,14 @@ public class AnalyzeOperationStrategy  implements ElasticsearchOperationStrategy
         if (StringUtils.isBlank(index)) {
             return FastJsonUtils.convertToHashMapList(client.indices().analyze(a -> a.analyzer(analyzer).text(text)).tokens());
         }
-        if (StringUtils.isNotBlank(field) && StringUtils.isNotBlank(index)) {
-            return FastJsonUtils.convertToHashMapList(client.indices().analyze(a -> a.index(index).field(field).analyzer(analyzer).text(text)).tokens());
+        if (StringUtils.isBlank(analyzer) && StringUtils.isBlank(field)) {
+            return FastJsonUtils.convertToHashMapList(client.indices().analyze(a -> a.index(index).text(text)).tokens());
+        }
+        if (StringUtils.isBlank(field)) {
+            return FastJsonUtils.convertToHashMapList(client.indices().analyze(a -> a.index(index).analyzer(analyzer).text(text)).tokens());
+        }
+        if (StringUtils.isBlank(analyzer)) {
+            return FastJsonUtils.convertToHashMapList(client.indices().analyze(a -> a.index(index).field(field).text(text)).tokens());
         }
         return FastJsonUtils.convertToHashMapList(client.indices().analyze(a -> a.index(index).analyzer(analyzer).text(text)).tokens());
     }
