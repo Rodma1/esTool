@@ -49,12 +49,12 @@
 
 ```shell
 [Unit]
-Description=navication
+Description=esTool
 After=network.target
 
 [Service]
 User=root
-ExecStart=/usr/bin/java  -Dfile.encoding=UTF-8 -Xms256m -Xmx512m -jar   -Dspring.config.location=/study/project/navigate/cyz_navigate/config/application.yml /study/project/navigate/cyz_navigate/cyz_navigate.jar
+ExecStart=/usr/bin/java  -Dfile.encoding=UTF-8 -Xms256m -Xmx512m -jar   -Dspring.config.location=/chen/code/esTool/backend/application.yml /chen/code/esTool/backend/esTool.jar
 SuccessExitStatus=143
 Restart=always
 
@@ -80,7 +80,7 @@ systemctl status cyz_navigate.service
 
 ![image-20240924102433585](image/image-20240924102433585.png)
 
-
+/usr/local/nginx/sbin
 
 > 作者：神的孩子都在歌唱
 >
