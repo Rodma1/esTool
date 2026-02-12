@@ -1,32 +1,28 @@
 package com.chen.common.utils.json;
 
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 public class ReadJsonUtils {
 
     public static String readJsonFile(String filename) {
-        String jsonString = "";
+        String jsonString = null; // 默认为 null，表示文件读取失败
         File jsonFile = new File(filename);
-        try {
-            FileReader fileReader = new FileReader(jsonFile);
-            Reader reader = new InputStreamReader(new FileInputStream(jsonFile), "utf-8");
-            int ch = 0;
+        try (Reader reader = new InputStreamReader(new FileInputStream(jsonFile), StandardCharsets.UTF_8)) {
             StringBuilder stringBuffer = new StringBuilder();
+            int ch;
             while ((ch = reader.read()) != -1) {
                 stringBuffer.append((char) ch);
             }
-            fileReader.close();
-            reader.close();
             jsonString = stringBuffer.toString();
         } catch (FileNotFoundException e) {
-            return null;
+            log.error("File not found: {}", filename, e);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Error reading file: {}", filename, e);
         }
-        return jsonString;
+        return jsonString; // 如果文件读取失败，则返回 null
     }
 }

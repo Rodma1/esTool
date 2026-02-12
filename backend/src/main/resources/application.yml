@@ -23,7 +23,8 @@ server:
 
 navigate:
   # es连接下载路径
-  esConnectParamPath: /study/project/esTool/data/esConnectParam.json
+  esConnectParamPath: D:\study\code\mycode\esTool\backend\data\esConnectParam.json
+  analyzersParamPath: D:\study\code\mycode\esTool\backend\data\analyzersParam.json
 
 # Spring配置
 spring:

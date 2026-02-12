@@ -1,0 +1,18 @@
+[
+  {
+
+    "scheme": "http",
+    "hostName": "192.168.1.100",
+    "userName": "plan_a",
+    "password": "plan_a",
+    "port": "19200"
+  },
+  {
+
+    "scheme": "http",
+    "hostName": "10.18.121.79",
+    "userName": "",
+    "password": "",
+    "port": "9200"
+  }
+]

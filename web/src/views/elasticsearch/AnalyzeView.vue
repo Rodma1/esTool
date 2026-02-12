@@ -26,17 +26,22 @@
             </el-row>
 
             <el-form-item label="分词器">
-                <el-select v-model="formData.analyzer" filterable clearable  placeholder="请选择分词器">
-                    <el-option v-for="(item, index) in analyzersMap" :key="index" :label="item" :value="item"></el-option>
-                </el-select>
-                <el-button type="text" size="small" @click="fetchAnalyzerOperations" style="margin-top: 10px;">
-                    刷新分词器
-                </el-button>
-                <el-button type="text" size="small" @click="toggleAnalyzerList" style="margin-top: 10px; margin-left: 10px;">
-                    {{ isAnalyzerListVisible ? '隐藏分词器列表' : '显示分词器列表' }}
-                </el-button>
+            <el-select v-model="formData.analyzer" filterable clearable placeholder="请选择分词器">
+                <!-- 遍历 analyzersMap 对象的键值对，显示 key，返回 value -->
+                <el-option 
+                v-for="(value, key) in analyzersMap" 
+                :key="key" 
+                :label="key" 
+                :value="value">
+                </el-option>
+            </el-select>
+            <el-button type="text" size="small" @click="fetchAnalyzerOperations" style="margin-top: 10px;">
+                刷新分词器
+            </el-button>
+            <el-button type="text" size="small" @click="toggleAnalyzerList" style="margin-top: 10px; margin-left: 10px;">
+                {{ isAnalyzerListVisible ? '隐藏分词器列表' : '显示分词器列表' }}
+            </el-button>
             </el-form-item>
-
             <!-- 分词器列表展示 -->
             <el-table v-if="isAnalyzerListVisible && analyzers.length > 0" :data="analyzers" style="width: 100%; margin-top: 20px;">
                 <el-table-column label="组件" prop="component"></el-table-column>
@@ -139,11 +144,12 @@ export default {
                 const response = await this.axios.post('/api/elasticsearch/operation', params);
 
                 // 从 Map 数据中提取出分词器名称
-                this.analyzersMap = Object.keys(response.data.data);  // 提取 Map 的键作为分词器名称
+                this.analyzersMap = response.data.data;  // 提取 Map 的键作为分词器名称
+                console.info(this.analyzersMap)
                 // 默认选择第一个分词器
-                if (this.analyzersMap.length > 0) {
-                    this.formData.analyzer = this.analyzersMap[0];
-                }
+                // if (this.analyzersMap.length > 0) {
+                //     this.formData.analyzer = this.analyzersMap;
+                // }
             } catch (error) {
                 this.errorMessage = '无法获取分词器列表。';
                 console.error(error);

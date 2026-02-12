@@ -2,8 +2,11 @@ package com.chen.service.elasticsearch.operation;
 
 import cn.hutool.core.util.ObjectUtil;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import com.chen.common.config.NavigateConfig;
 import com.chen.common.utils.StringUtils;
 import com.chen.common.utils.json.FastJsonUtils;
+import com.chen.common.utils.json.ReadJsonUtils;
+import com.chen.domain.elsaticsearch.ElasticsearchConnectParam;
 import com.chen.domain.elsaticsearch.ElasticsearchFactoryParam;
 import com.chen.service.elasticsearch.impl.ElasticsearchOperationStrategy;
 
@@ -41,13 +44,7 @@ public class AnalyzeOperationStrategy  implements ElasticsearchOperationStrategy
      * 可以使用的分词器
      */
     public Object analyzers() throws IOException {
-        HashMap<String, String> stringStringHashMap = new HashMap<>();
-        stringStringHashMap.put("jieba_index", "jieba_index");
-        stringStringHashMap.put("jieba_search", "jieba_search");
-        stringStringHashMap.put("ik_smart", "ik_smart");
-        stringStringHashMap.put("ik_max_word", "ik_max_word");
-        stringStringHashMap.put("standard", "standard");
-        return stringStringHashMap;
+        return FastJsonUtils.toObject(ReadJsonUtils.readJsonFile(NavigateConfig.getAnalyzersParamPath()));
     }
 
     /**

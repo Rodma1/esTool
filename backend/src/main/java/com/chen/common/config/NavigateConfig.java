@@ -23,25 +23,18 @@ public class NavigateConfig {
      */
     @Getter
     private static String esConnectParamPath;
+
+
     public void setEsConnectParamPath(String esConnectParamPath) {
         NavigateConfig.esConnectParamPath = esConnectParamPath;
     }
 
     /**
-     * 用户名
+     * 分析器参数
      */
     @Getter
-    private static String principal;
-    public void setPrincipal(String principal) {
-        NavigateConfig.principal = principal;
-    }
-
-    /**
-     * 密码
-     */
-    @Getter
-    private static String credential;
-    public void setCredential(String credential) {
-        NavigateConfig.credential = credential;
+    private static String analyzersParamPath;
+    public void setAnalyzersParamPath(String analyzersParamPath) {
+        NavigateConfig.analyzersParamPath = analyzersParamPath;
     }
 }
