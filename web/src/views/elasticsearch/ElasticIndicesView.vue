@@ -4,8 +4,15 @@
         <el-button @click="dialogVisible = true">创建索引</el-button>
         <el-button @click="deleteIndex">删除索引</el-button>
         <el-button @click="aliasDialogVisible = true">关联别名</el-button>
+                <!-- 检索框 -->
+                <el-input 
+            v-model="searchQuery" 
+            placeholder="请输入索引名进行检索" 
+            clearable 
+            style="margin-bottom: 20px; width: 300px;">
+        </el-input>
 
-        <el-table ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%"
+        <el-table ref="multipleTable" :data="filteredTableData" tooltip-effect="dark" style="width: 100%"
             @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55">
             </el-table-column>
@@ -74,6 +81,7 @@ export default {
     },
     data() {
         return {
+            searchQuery: '', // 检索框绑定的值
             tableData: [{
                 index: '',
                 docsCount: '',
@@ -98,7 +106,14 @@ export default {
             },
         }
     },
-
+    computed: {
+        filteredTableData() {
+            // 根据检索框的值动态过滤表格数据
+            return this.tableData.filter(item =>
+                item.index.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+        }
+    },
     methods: {
         handleSelectionChange(val) {
             this.multipleSelection = [];
