@@ -26,15 +26,21 @@
             </el-row>
 
             <el-form-item label="分词器">
-            <el-select v-model="formData.analyzer" filterable clearable placeholder="请选择分词器">
-                <!-- 遍历 analyzersMap 对象的键值对，显示 key，返回 value -->
-                <el-option 
-                v-for="(value, key) in analyzersMap" 
-                :key="key" 
-                :label="key" 
-                :value="value">
-                </el-option>
-            </el-select>
+                <el-select 
+                    v-model="formData.analyzer" 
+                    filterable 
+                    default-first-option 
+                    clearable 
+                    allow-create 
+                    placeholder="请选择或输入分词器">
+                    <!-- 遍历 analyzersMap 对象的键值对，显示 key，返回 value -->
+                    <el-option 
+                        v-for="(value, key) in analyzersMap" 
+                        :key="key" 
+                        :label="key" 
+                        :value="value">
+                    </el-option>
+                </el-select>
             <el-button type="text" size="small" @click="fetchAnalyzerOperations" style="margin-top: 10px;">
                 刷新分词器
             </el-button>
@@ -101,16 +107,26 @@ export default {
             params.operationType = operationType;
             return params;
         },
-        async getIndexNames() {
-            const params = this.getParams("INDEX_LIST")
-            params.operationCategory = "INDEX"
-            const response = await this.axios.post('/api/elasticsearch/operation', params);
-            const values = response.data.data
-            const indexNames = []
-            values.forEach(item => {
-                indexNames.push(item.index)
-            })
-            this.indexNames = indexNames;
+            async getIndexNames() {
+            const params = this.getParams("INDEX_LIST");
+            params.operationCategory = "INDEX";
+        
+            try {
+                const response = await this.axios.post('/api/elasticsearch/operation', params);
+                const values = response.data.data;
+        
+                // 确保 values 是数组
+                if (Array.isArray(values)) {
+                    const indexNames = values.map(item => item.index); // 使用 map 简化代码
+                    this.indexNames = indexNames;
+                } else {
+                    console.error('API 返回的值不是数组:', values);
+                    this.indexNames = []; // 设置为空数组以避免错误
+                }
+            } catch (error) {
+                console.error('获取索引名时出错:', error);
+                this.indexNames = []; // 设置为空数组以避免错误
+            }
         },
         // 切换分词器列表显示并刷新接口
         async toggleAnalyzerList() {
