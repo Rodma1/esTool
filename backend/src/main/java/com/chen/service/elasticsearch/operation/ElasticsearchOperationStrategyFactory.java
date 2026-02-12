@@ -28,6 +28,8 @@ public class ElasticsearchOperationStrategyFactory {
                 return new TaskOperationStrategy(factoryParam);
             case "ANALYZE":
                 return new AnalyzeOperationStrategy(factoryParam);
+            case "MAPPING":
+                return new IndexMappingOperationStrategy(factoryParam);
             case "OTHER":
                 return new EsOther();
             default:

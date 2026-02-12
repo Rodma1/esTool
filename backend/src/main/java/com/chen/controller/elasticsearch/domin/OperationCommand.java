@@ -97,4 +97,7 @@ public class OperationCommand {
 
     @ApiModelProperty("字段")
     public String field;
+
+    @ApiModelProperty("映射-Json")
+    public String mapping;
 }
