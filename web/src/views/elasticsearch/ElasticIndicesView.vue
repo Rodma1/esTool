@@ -145,6 +145,8 @@
 <script>
 import JsonViewer from 'vue-json-viewer';
 import 'vue-json-viewer/style.css';
+import { handleApiMessage } from '@/utils/messageUtil.js';
+
 export default {
     components: {
         JsonViewer, // 注册 vue-jsoneditor 组件
@@ -337,13 +339,14 @@ export default {
 
                 // 调用后端接口
                 const response = await this.axios.post('/api/elasticsearch/operation', params);
+                const success = await handleApiMessage(
+                    response,
+                    '映射创建成功'
+                );
 
-                // 显示成功消息
-                this.$message({
-                    message: response.data.message || '映射创建成功',
-                    type: 'success',
-                });
-
+                if (!success) {
+                    return;
+                }
                 // 关闭对话框并清空表单
                 this.createMappingDialogVisible = false;
                 this.createMappingData.indexName = '';
