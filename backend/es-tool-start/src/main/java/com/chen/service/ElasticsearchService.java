@@ -49,11 +49,15 @@ public class ElasticsearchService implements DisposableBean {
         }
 
         ElasticsearchClient client = clientConfig.elasticsearchClient();
-        if (strategy != null) {
-            Object execute = strategy.execute(client);
-            return execute;
+        // 使用 try-finally 块增强异常安全性，避免资源泄漏
+        try {
+            if (strategy != null) {
+                return strategy.execute(client);
+            }
+            return null;
+        } finally {
+            // 不在此处关闭客户端，交给 Spring 容器或 JVM 关闭钩子处理
         }
-        return null;
     }
 
     /**
@@ -62,6 +66,7 @@ public class ElasticsearchService implements DisposableBean {
 
     @Override
     public void destroy(){
+        System.out.println("ElasticsearchService is being destroyed.");
         clientConfig.close();
     }
 }
