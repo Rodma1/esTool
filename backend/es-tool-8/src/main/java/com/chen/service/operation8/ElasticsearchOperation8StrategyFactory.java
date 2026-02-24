@@ -1,4 +1,4 @@
-package com.chen.service.operation;
+package com.chen.service.operation8;
 import com.chen.domain.elsaticsearch.ElasticsearchFactoryParam;
 import com.chen.service.elasticsearch.impl.ElasticsearchOperationStrategy;
 
@@ -7,7 +7,7 @@ import com.chen.service.elasticsearch.impl.ElasticsearchOperationStrategy;
  * @DATE 2024/6/24 18:00
  * @Description: es 工厂模式
  */
-public class ElasticsearchOperationStrategyFactory {
+public class ElasticsearchOperation8StrategyFactory {
 
     /**
      * 创建策略

@@ -1,4 +1,4 @@
-package com.chen.service.operation;
+package com.chen.service.operation8;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.indices.GetMappingResponse;
@@ -7,7 +7,6 @@ import com.chen.common.utils.json.FastJsonUtils;
 import com.chen.domain.elsaticsearch.ElasticsearchFactoryParam;
 import com.chen.service.elasticsearch.impl.ElasticsearchOperationStrategy;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.data.Index;
 
 import java.io.IOException;
 import java.io.StringReader;

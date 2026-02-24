@@ -33,6 +33,9 @@ public class OperationCommand {
     @ApiModelProperty("协议 http  https")
     private String scheme;
 
+    @ApiModelProperty("版本")
+    private String version;
+
 
     @ApiModelProperty("操作类别 文档  索引")
     public String operationCategory;

@@ -29,6 +29,9 @@ public class ElasticsearchConnectParam implements Serializable {
     @ApiModelProperty("协议 http  https")
     private String scheme;
 
+    @ApiModelProperty("版本")
+    private String version;
+
     public ElasticsearchConnectParam() {
 
     }

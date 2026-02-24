@@ -3,12 +3,12 @@
 
         <el-form ref="form" :inline="true" :model="form" label-width="80px">
             <el-form-item label="选择地址: ">
-                <el-select v-model="selectHostName"  clearable  placeholder="选择连接地址"  @change="selectConnectParam()">
+                <el-select v-model="selectHostName" clearable placeholder="选择连接地址" @change="selectConnectParam()">
                     <el-option
                         v-for="item in connectForm"
-                        :key="item.hostName"
-                        :label="item.hostName"
-                        :value="item.hostName">
+                        :key="item.hostName + ':' + item.port + ':' + item.version" 
+                        :label="item.hostName + ':' + item.port + ':' + item.version"
+                        :value="item.hostName + ':' + item.port + ':' + item.version">
                     </el-option>
                 </el-select>
             </el-form-item>
@@ -32,6 +32,9 @@
             </el-form-item>
             <el-form-item label="端口">
                 <el-input v-model="form.port"></el-input>
+            </el-form-item>
+            <el-form-item label="版本">
+                <el-input v-model="form.version"></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" :plain="true" @click="linkTest">链接测试</el-button>
@@ -85,6 +88,7 @@ export default {
                 userName: '',
                 password: '',
                 port: '',
+                version: '',
                 operationCategory: 'INFO',
 
             },
@@ -130,7 +134,7 @@ export default {
             this.connectForm = response.data.data
         },
         selectConnectParam(){
-            this.form = this.connectForm.find(item1 => item1.hostName === this.selectHostName)
+            this.form = this.connectForm.find(item1 => item1.hostName + ':' + item1.port + ':' + item1.version === this.selectHostName)
         },
 
     },

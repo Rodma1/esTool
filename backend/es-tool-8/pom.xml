@@ -7,11 +7,10 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>es-tool-7</artifactId>
-    <description>Elasticsearch 7.x 集群工具</description>
+    <artifactId>es-tool-8</artifactId>
     <packaging>jar</packaging>
 
-    <name>es-tool-7</name>
+    <name>es-tool-8</name>
     <url>http://maven.apache.org</url>
 
     <properties>

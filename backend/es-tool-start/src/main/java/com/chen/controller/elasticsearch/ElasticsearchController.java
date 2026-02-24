@@ -8,7 +8,6 @@ import com.chen.controller.elasticsearch.domin.OperationCommand;
 import com.chen.domain.elsaticsearch.ElasticsearchConnectParam;
 import com.chen.domain.elsaticsearch.ElasticsearchFactoryParam;
 import com.chen.service.ElasticsearchService;
-import com.chen.service.operation.ElasticsearchOperationStrategyFactory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;

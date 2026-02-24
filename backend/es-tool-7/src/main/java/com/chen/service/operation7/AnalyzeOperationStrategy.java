@@ -1,17 +1,14 @@
-package com.chen.service.operation;
+package com.chen.service.operation7;
 
-import cn.hutool.core.util.ObjectUtil;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.chen.common.config.NavigateConfig;
 import com.chen.common.utils.StringUtils;
 import com.chen.common.utils.json.FastJsonUtils;
 import com.chen.common.utils.json.ReadJsonUtils;
-import com.chen.domain.elsaticsearch.ElasticsearchConnectParam;
 import com.chen.domain.elsaticsearch.ElasticsearchFactoryParam;
 import com.chen.service.elasticsearch.impl.ElasticsearchOperationStrategy;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 public class AnalyzeOperationStrategy  implements ElasticsearchOperationStrategy {
     private  final ElasticsearchFactoryParam factoryParam;
