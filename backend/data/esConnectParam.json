@@ -25,5 +25,14 @@
     "password": "",
     "port": "9200",
     "version": "7"
+  },
+  {
+
+    "scheme": "http",
+    "hostName": "10.18.121.79",
+    "userName": "",
+    "password": "",
+    "port": "9220",
+    "version": "9"
   }
 ]

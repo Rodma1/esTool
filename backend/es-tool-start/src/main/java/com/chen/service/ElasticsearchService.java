@@ -6,11 +6,12 @@ import com.chen.common.config.elasticsearch.ElasticsearchClientConfig;
 import com.chen.common.utils.StringUtils;
 import com.chen.config.ElasticsearchClient7Config;
 import com.chen.config.ElasticsearchClient8Config;
+import com.chen.config.ElasticsearchClient9Config;
 import com.chen.domain.elsaticsearch.ElasticsearchConnectParam;
 import com.chen.domain.elsaticsearch.ElasticsearchFactoryParam;
 import com.chen.service.elasticsearch.impl.ElasticsearchOperationStrategy;
 import com.chen.service.operation7.ElasticsearchOperation7StrategyFactory;
-import com.chen.service.operation8.ElasticsearchOperation8StrategyFactory;
+import com.chen.service.operation8.ElasticsearchOperation9StrategyFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,9 @@ public class ElasticsearchService implements DisposableBean {
     private ElasticsearchClientConfig clientConfig;
 
     public Object performOperation(ElasticsearchFactoryParam factoryParam, ElasticsearchConnectParam connectParam) throws IOException {
-
+        if (ObjectUtil.isNull(connectParam.getPort())) {
+            return null;
+        }
         ElasticsearchOperationStrategy strategy = null;
         String version = connectParam.getVersion();
         if (StringUtils.isBlank(version)) {
@@ -38,8 +41,13 @@ public class ElasticsearchService implements DisposableBean {
             strategy = ElasticsearchOperation7StrategyFactory.createStrategy(factoryParam);
         } else if (version.equals("8")) {
             this.clientConfig = new ElasticsearchClient8Config(connectParam);
-            strategy = ElasticsearchOperation8StrategyFactory.createStrategy(factoryParam);
-        } else if (version.equals("7")) {
+            strategy = ElasticsearchOperation9StrategyFactory.createStrategy(factoryParam);
+        } else if (version.equals("9")) {
+            this.clientConfig = new ElasticsearchClient9Config(connectParam);
+            strategy = ElasticsearchOperation9StrategyFactory.createStrategy(factoryParam);
+        }
+
+        else if (version.equals("7")) {
             this.clientConfig = new ElasticsearchClient7Config(connectParam);
             strategy = ElasticsearchOperation7StrategyFactory.createStrategy(factoryParam);
         }

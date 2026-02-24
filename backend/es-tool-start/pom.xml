@@ -35,6 +35,13 @@
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.chen</groupId>
+            <artifactId>es-tool-9</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -74,12 +81,12 @@
                     <proguardInclude>${project.basedir}/proguard.cfg</proguardInclude>
                     <!-- 额外的jar包，通常是项目编译所需要的jar -->
                     <libs>
-                        <lib>${java.home}/lib/rt.jar</lib>
+<!--                        <lib>${java.home}/lib/rt.jar</lib>-->
                         <!--                        <lib>${java.home}/lib/jce.jar</lib>-->
                         <!--                        <lib>${java.home}/lib/jsse.jar</lib>-->
                     </libs>
                     <!-- 对输入jar进行过滤比如，如下配置就是对META-INFO文件不处理。 -->
-                    <inLibsFilter>!META-INF/**,!META-INF/versions/9/**.class</inLibsFilter>
+<!--                    <inLibsFilter>!META-INF/**,!META-INF/versions/9/**.class</inLibsFilter>-->
                     <!-- 这是输出路径配置，但是要注意这个路径必须要包括injar标签填写的jar -->
                     <outputDirectory>${project.basedir}/target</outputDirectory>
                     <!--这里特别重要，此处主要是配置混淆的一些细节选项，比如哪些类不需要混淆，哪些需要混淆-->
