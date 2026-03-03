@@ -9,6 +9,8 @@ import com.chen.config.ElasticsearchClient8Config;
 import com.chen.config.ElasticsearchClient9Config;
 import com.chen.domain.elsaticsearch.ElasticsearchConnectParam;
 import com.chen.domain.elsaticsearch.ElasticsearchFactoryParam;
+import com.chen.domain.elsaticsearch.ElasticsearchHttpRequestParam;
+import com.chen.service.elasticsearch.ElasticsearchCurlClient;
 import com.chen.service.elasticsearch.impl.ElasticsearchOperationStrategy;
 import com.chen.service.operation7.ElasticsearchOperation7StrategyFactory;
 import com.chen.service.operation8.ElasticsearchOperation9StrategyFactory;
@@ -64,6 +66,7 @@ public class ElasticsearchService implements DisposableBean {
             }
             return null;
         } finally {
+            clientConfig.close();
             // 不在此处关闭客户端，交给 Spring 容器或 JVM 关闭钩子处理
         }
     }
@@ -76,5 +79,22 @@ public class ElasticsearchService implements DisposableBean {
     public void destroy(){
         System.out.println("ElasticsearchService is being destroyed.");
         clientConfig.close();
+    }
+
+    public Object httpOperation(ElasticsearchHttpRequestParam connectParam) {
+
+        if (ObjectUtil.isNull(connectParam.getPort())) {
+            return null;
+        }
+        ElasticsearchCurlClient client = new ElasticsearchCurlClient(
+                connectParam.getHostName(), connectParam.getPort(), connectParam.getScheme(), connectParam.getUserName(), connectParam.getPassword()
+        );
+        try {
+            return client.executeRequest(connectParam.getMethod(), connectParam.getEndpoint(), connectParam.getBody());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            client.close();
+        }
     }
 }

@@ -76,7 +76,7 @@
                     <!-- 输出jar名称，输入输出jar同名的时候就是覆盖，也是比较常用的配置。 -->
                     <outjar>${project.build.finalName}.jar</outjar>
                     <!-- 是否混淆 默认是true -->
-                    <obfuscate>true</obfuscate>
+                    <obfuscate>false</obfuscate>
                     <!-- 配置一个文件，通常叫做proguard.cfg,该文件主要是配置options选项，也就是说使用proguard.cfg那么options下的所有内容都可以移到proguard.cfg中 -->
                     <proguardInclude>${project.basedir}/proguard.cfg</proguardInclude>
                     <!-- 额外的jar包，通常是项目编译所需要的jar -->

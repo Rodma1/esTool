@@ -7,6 +7,7 @@ import com.chen.common.utils.resultreturn.ResultData;
 import com.chen.controller.elasticsearch.domin.OperationCommand;
 import com.chen.domain.elsaticsearch.ElasticsearchConnectParam;
 import com.chen.domain.elsaticsearch.ElasticsearchFactoryParam;
+import com.chen.domain.elsaticsearch.ElasticsearchHttpRequestParam;
 import com.chen.service.ElasticsearchService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -48,6 +49,17 @@ public class ElasticsearchController {
     public ResultData<List<ElasticsearchConnectParam>> getConnectParam() {
         String jsonObject = ReadJsonUtils.readJsonFile(NavigateConfig.getEsConnectParamPath());
         return ResultData.success(FastJsonUtils.toList(jsonObject, ElasticsearchConnectParam.class));
+    }
+
+    /**
+     * es的http请求操作
+     */
+    @ApiOperation("es的http请求操作")
+    @PostMapping("/httpOperation")
+    public ResultData<Object> httpOperation(@RequestBody ElasticsearchHttpRequestParam operationCommand) throws IOException {
+
+        return ResultData.success(elasticsearchService.httpOperation(
+                operationCommand));
     }
 
 }
