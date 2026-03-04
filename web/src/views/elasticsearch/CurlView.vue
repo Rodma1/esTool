@@ -61,7 +61,7 @@
       ></el-input>
     </div>
 
-    <!-- 响应结果区域 -->
+     <!-- 响应结果区域 -->
     <div class="response-section">
       <div class="section-header">
         <span class="section-title">响应结果</span>
@@ -108,15 +108,20 @@
       <!-- 空状态 -->
       <el-empty description="点击发送按钮执行请求" v-if="!responseData && !responseText"/>
     </div>
+
+    <!-- API 文档组件 -->
+    <ApiDocsPanel @use-api="handleUseApi"/>
   </div>
 </template>
 
 <script>
 import JsonViewer from 'vue-json-viewer';
+import ApiDocsPanel from './ApiDocsPanel.vue';
 
 export default {
   components: {
     JsonViewer,
+    ApiDocsPanel,
   },
   props: {
     connectParam: Object,
@@ -166,66 +171,95 @@ export default {
     }
   },
   methods: {
-      getPlaceholder() {
-        if (this.bodyType === 'json') {
-          return `请输入 JSON 格式的请求体，例如：
-            {
-              "query": {
-                "match_all": {}
-              },
-              "size": 10
-            }`;
-        } else {
-          return '请输入请求体内容';
+    handleUseApi(api) {
+      this.requestForm.method = api.method;
+      this.requestForm.endpoint = api.endpoint.replace('{index}', 'your_index');
+
+      // 根据 API 类型自动填充请求体
+      if (api.method === 'POST' || api.method === 'PUT') {
+        if (api.description.includes('搜索') || api.description.includes('查询')) {
+          this.requestForm.body = JSON.stringify({
+            query: { match_all: {} }
+          }, null, 2);
+        } else if (api.description.includes('创建索引')) {
+          this.requestForm.body = JSON.stringify({
+            settings: {
+              number_of_shards: 3,
+              number_of_replicas: 1
+            },
+            mappings: {
+              properties: {
+                title: { type: 'text' },
+                createTime: { type: 'date' }
+              }
+            }
+          }, null, 2);
         }
-      },
+      }
 
-      formatJson() {
-        try {
-          if (!this.requestForm.body.trim()) {
-            this.$message.warning('请先输入 JSON 内容');
-            return;
-          }
-          const parsed = JSON.parse(this.requestForm.body);
-          this.requestForm.body = JSON.stringify(parsed, null, 2);
-          this.$message.success('JSON 格式化成功');
-        } catch (e) {
-          this.$message.error('JSON 格式错误：' + e.message);
-        }
-      },
+      this.$message.success('已加载 API 模板，请根据实际情况修改');
+    },
 
-      compressJson() {
-        try {
-          if (!this.requestForm.body.trim()) {
-            this.$message.warning('请先输入 JSON 内容');
-            return;
-          }
-          const parsed = JSON.parse(this.requestForm.body);
-          this.requestForm.body = JSON.stringify(parsed);
-          this.$message.success('JSON 压缩成功');
-        } catch (e) {
-          this.$message.error('JSON 格式错误：' + e.message);
-        }
-      },
+    getPlaceholder() {
+      if (this.bodyType === 'json') {
+        return `请输入 JSON 格式的请求体，例如：
+{
+  "query": {
+    "match_all": {}
+  },
+  "size": 10
+}`;
+      } else {
+        return '请输入请求体内容';
+      }
+    },
 
-      clearBody() {
-        this.requestForm.body = '';
-        this.$message.success('已清空请求体');
-      },
-
-      copyBody() {
-        if (!this.requestForm.body) {
-          this.$message.warning('没有可复制的内容');
+    formatJson() {
+      try {
+        if (!this.requestForm.body.trim()) {
+          this.$message.warning('请先输入 JSON 内容');
           return;
         }
-        const el = document.createElement('textarea');
-        el.value = this.requestForm.body;
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand('copy');
-        document.body.removeChild(el);
-        this.$message.success('已复制到剪贴板');
-      },
+        const parsed = JSON.parse(this.requestForm.body);
+        this.requestForm.body = JSON.stringify(parsed, null, 2);
+        this.$message.success('JSON 格式化成功');
+      } catch (e) {
+        this.$message.error('JSON 格式错误：' + e.message);
+      }
+    },
+
+    compressJson() {
+      try {
+        if (!this.requestForm.body.trim()) {
+          this.$message.warning('请先输入 JSON 内容');
+          return;
+        }
+        const parsed = JSON.parse(this.requestForm.body);
+        this.requestForm.body = JSON.stringify(parsed);
+        this.$message.success('JSON 压缩成功');
+      } catch (e) {
+        this.$message.error('JSON 格式错误：' + e.message);
+      }
+    },
+
+    clearBody() {
+      this.requestForm.body = '';
+      this.$message.success('已清空请求体');
+    },
+
+    copyBody() {
+      if (!this.requestForm.body) {
+        this.$message.warning('没有可复制的内容');
+        return;
+      }
+      const el = document.createElement('textarea');
+      el.value = this.requestForm.body;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      this.$message.success('已复制到剪贴板');
+    },
     getParams(operationType) {
       const params = {
         ...this.connectParam,
@@ -351,7 +385,8 @@ export default {
 }
 </script>
 
-<style scoped>.curl-container {
+<style scoped>
+.curl-container {
   padding: 20px;
   background-color: #fff;
   border-radius: 8px;
@@ -393,6 +428,12 @@ export default {
   border-bottom: 1px solid #ebeef5;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .section-title {
   font-weight: bold;
   font-size: 14px;
@@ -425,27 +466,6 @@ export default {
   word-wrap: break-word;
   max-height: 600px;
   overflow-y: auto;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.section-title {
-  font-weight: bold;
-  font-size: 14px;
-  color: #303133;
 }
 
 .body-textarea {
