@@ -14,7 +14,7 @@
 
         <el-input
             v-model="requestForm.endpoint"
-            placeholder="输入 API 端点，如：/_cluster/health"
+            placeholder="输入 API 端点，如：/_cat/indices?v"
             class="endpoint-input"
             clearable
         >
@@ -29,20 +29,34 @@
       </div>
     </div>
 
-    <!-- 请求体区域 (POST/PUT/PATCH) -->
+    <!-- 请求体区域 (所有方法都可以使用) -->
     <div class="request-body-section" v-if="showRequestBody">
       <div class="section-header">
         <span class="section-title">请求体</span>
-        <el-radio-group v-model="bodyType" size="small">
-          <el-radio-button label="json">JSON</el-radio-button>
-          <el-radio-button label="text">文本</el-radio-button>
-        </el-radio-group>
+        <div class="header-actions">
+          <el-radio-group v-model="bodyType" size="small">
+            <el-radio-button label="json">JSON</el-radio-button>
+            <el-radio-button label="text">文本</el-radio-button>
+          </el-radio-group>
+          <el-button size="mini" @click="formatJson" v-if="bodyType === 'json'" title="格式化 JSON">
+            <i class="el-icon-rank"></i> 格式化
+          </el-button>
+          <el-button size="mini" type="success" @click="compressJson" v-if="bodyType === 'json'" title="压缩 JSON">
+            <i class="el-icon-zoom-in"></i> 压缩
+          </el-button>
+          <el-button size="mini" type="warning" @click="copyBody" title="复制请求体">
+            <i class="el-icon-document-copy"></i> 复制
+          </el-button>
+          <el-button size="mini" type="danger" @click="clearBody" title="清空">
+            <i class="el-icon-delete"></i> 清空
+          </el-button>
+        </div>
       </div>
       <el-input
           type="textarea"
           v-model="requestForm.body"
-          :rows="8"
-          placeholder='请输入 JSON 格式的请求体'
+          :rows="12"
+          :placeholder="getPlaceholder()"
           class="body-textarea"
       ></el-input>
     </div>
@@ -152,6 +166,66 @@ export default {
     }
   },
   methods: {
+      getPlaceholder() {
+        if (this.bodyType === 'json') {
+          return `请输入 JSON 格式的请求体，例如：
+            {
+              "query": {
+                "match_all": {}
+              },
+              "size": 10
+            }`;
+        } else {
+          return '请输入请求体内容';
+        }
+      },
+
+      formatJson() {
+        try {
+          if (!this.requestForm.body.trim()) {
+            this.$message.warning('请先输入 JSON 内容');
+            return;
+          }
+          const parsed = JSON.parse(this.requestForm.body);
+          this.requestForm.body = JSON.stringify(parsed, null, 2);
+          this.$message.success('JSON 格式化成功');
+        } catch (e) {
+          this.$message.error('JSON 格式错误：' + e.message);
+        }
+      },
+
+      compressJson() {
+        try {
+          if (!this.requestForm.body.trim()) {
+            this.$message.warning('请先输入 JSON 内容');
+            return;
+          }
+          const parsed = JSON.parse(this.requestForm.body);
+          this.requestForm.body = JSON.stringify(parsed);
+          this.$message.success('JSON 压缩成功');
+        } catch (e) {
+          this.$message.error('JSON 格式错误：' + e.message);
+        }
+      },
+
+      clearBody() {
+        this.requestForm.body = '';
+        this.$message.success('已清空请求体');
+      },
+
+      copyBody() {
+        if (!this.requestForm.body) {
+          this.$message.warning('没有可复制的内容');
+          return;
+        }
+        const el = document.createElement('textarea');
+        el.value = this.requestForm.body;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        this.$message.success('已复制到剪贴板');
+      },
     getParams(operationType) {
       const params = {
         ...this.connectParam,
@@ -351,5 +425,42 @@ export default {
   word-wrap: break-word;
   max-height: 600px;
   overflow-y: auto;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-title {
+  font-weight: bold;
+  font-size: 14px;
+  color: #303133;
+}
+
+.body-textarea {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  background-color: #fafafa;
+  border: 1px solid #dcdfe6;
+}
+
+.body-textarea:hover {
+  border-color: #c0c4cc;
+}
+
+.body-textarea:focus {
+  border-color: #409EFF;
+  background-color: #fff;
 }
 </style>
