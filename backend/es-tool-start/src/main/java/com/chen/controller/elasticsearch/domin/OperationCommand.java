@@ -6,6 +6,7 @@ import com.chen.domain.elsaticsearch.UpdateFields;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ import java.util.List;
  * @Description:
  */
 @ApiModel("基本操作的请求参数")
+@Accessors(chain = true)
 @Data
 public class OperationCommand {
 

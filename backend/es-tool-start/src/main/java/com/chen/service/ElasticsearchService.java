@@ -30,31 +30,32 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class ElasticsearchService implements DisposableBean {
 
-    private ElasticsearchClientConfig clientConfig;
+//    private ElasticsearchClientConfig clientConfig;
 
     public Object performOperation(ElasticsearchFactoryParam factoryParam, ElasticsearchConnectParam connectParam) throws IOException {
         if (ObjectUtil.isNull(connectParam.getPort())) {
             return null;
         }
+        ElasticsearchClientConfig clientConfig = null;
         ElasticsearchOperationStrategy strategy = null;
         String version = connectParam.getVersion();
         if (StringUtils.isBlank(version)) {
-            this.clientConfig = new ElasticsearchClient7Config(connectParam);
+            clientConfig = new ElasticsearchClient7Config(connectParam);
             strategy = ElasticsearchOperation7StrategyFactory.createStrategy(factoryParam);
         } else if (version.equals("8")) {
-            this.clientConfig = new ElasticsearchClient8Config(connectParam);
+            clientConfig = new ElasticsearchClient8Config(connectParam);
             strategy = ElasticsearchOperation9StrategyFactory.createStrategy(factoryParam);
         } else if (version.equals("9")) {
-            this.clientConfig = new ElasticsearchClient9Config(connectParam);
+            clientConfig = new ElasticsearchClient9Config(connectParam);
             strategy = ElasticsearchOperation9StrategyFactory.createStrategy(factoryParam);
         }
 
         else if (version.equals("7")) {
-            this.clientConfig = new ElasticsearchClient7Config(connectParam);
+            clientConfig = new ElasticsearchClient7Config(connectParam);
             strategy = ElasticsearchOperation7StrategyFactory.createStrategy(factoryParam);
         }
         else {
-            this.clientConfig = new ElasticsearchClient7Config(connectParam);
+            clientConfig = new ElasticsearchClient7Config(connectParam);
             strategy = ElasticsearchOperation7StrategyFactory.createStrategy(factoryParam);
         }
 
@@ -66,6 +67,7 @@ public class ElasticsearchService implements DisposableBean {
             }
             return null;
         } finally {
+            // 只关闭当前请求的配置，不影响其他请求
             clientConfig.close();
             // 不在此处关闭客户端，交给 Spring 容器或 JVM 关闭钩子处理
         }
@@ -78,7 +80,7 @@ public class ElasticsearchService implements DisposableBean {
     @Override
     public void destroy(){
         System.out.println("ElasticsearchService is being destroyed.");
-        clientConfig.close();
+//        clientConfig.close();
     }
 
     public Object httpOperation(ElasticsearchHttpRequestParam connectParam) {
