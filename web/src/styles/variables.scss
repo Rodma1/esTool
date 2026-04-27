@@ -1,0 +1,49 @@
+:root {
+  // Sidebar / Dark areas
+  --sidebar-bg: #1e1e2d;
+  --sidebar-hover: #27273a;
+  --sidebar-active: #3699ff;
+  --sidebar-text: #9899ac;
+  --sidebar-text-active: #ffffff;
+
+  // Top header
+  --header-bg: #ffffff;
+  --header-border: #e4e6ef;
+  --header-text: #181c32;
+
+  // Content area
+  --content-bg: #f5f8fa;
+  --card-bg: #ffffff;
+  --card-border: #e4e6ef;
+
+  // Text
+  --text-primary: #181c32;
+  --text-secondary: #7e8299;
+  --text-muted: #a1a5b7;
+
+  // Accent (Element UI primary)
+  --primary: #409eff;
+  --primary-light: #ecf5ff;
+  --success: #67c23a;
+  --warning: #e6a23c;
+  --danger: #f56c6c;
+
+  // Status indicators
+  --status-green: #67c23a;
+  --status-yellow: #e6a23c;
+  --status-red: #f56c6c;
+  --status-gray: #909399;
+
+  // Shadows & Radius
+  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+  --shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.05);
+  --radius: 8px;
+  --radius-sm: 4px;
+
+  // Spacing
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+}

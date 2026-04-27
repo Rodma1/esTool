@@ -13,26 +13,24 @@
         </el-select>
 
         <el-input
-            v-model="requestForm.endpoint"
-            placeholder="输入 API 端点，如：/_cat/indices?v"
-            class="endpoint-input"
-            clearable
+          v-model="requestForm.endpoint"
+          placeholder="输入 API 端点，如：/_cat/indices?v"
+          class="endpoint-input"
+          clearable
         >
-          <template slot="prepend">
-            {{ baseUrl }}
-          </template>
+          <template slot="prepend">{{ baseUrl }}</template>
         </el-input>
 
-        <el-button type="primary" @click="executeRequest" :loading="isLoading" class="send-btn">
+        <el-button type="primary" icon="el-icon-s-promotion" @click="executeRequest" :loading="isLoading" class="send-btn">
           发送
         </el-button>
       </div>
     </div>
 
-    <!-- 请求体区域 (所有方法都可以使用) -->
-    <div class="request-body-section" v-if="showRequestBody">
+    <!-- 请求体区域 -->
+    <div v-if="showRequestBody" class="request-body-section">
       <div class="section-header">
-        <span class="section-title">请求体</span>
+        <span class="section-title"><i class="el-icon-document"></i> 请求体</span>
         <div class="header-actions">
           <el-radio-group v-model="bodyType" size="small">
             <el-radio-button label="json">JSON</el-radio-button>
@@ -53,18 +51,18 @@
         </div>
       </div>
       <el-input
-          type="textarea"
-          v-model="requestForm.body"
-          :rows="12"
-          :placeholder="getPlaceholder()"
-          class="body-textarea"
+        type="textarea"
+        v-model="requestForm.body"
+        :rows="12"
+        :placeholder="getPlaceholder()"
+        class="body-textarea"
       ></el-input>
     </div>
 
-     <!-- 响应结果区域 -->
+    <!-- 响应结果区域 -->
     <div class="response-section">
       <div class="section-header">
-        <span class="section-title">响应结果</span>
+        <span class="section-title"><i class="el-icon-message"></i> 响应结果</span>
         <div class="response-actions">
           <el-tag :type="responseStatusTag" size="small" v-if="responseStatus">
             状态码：{{ responseStatus }}
@@ -84,33 +82,33 @@
 
       <!-- JSON 视图 -->
       <json-viewer
-          v-if="responseViewType === 'json' && responseData"
-          :value="responseData"
-          :expand-depth="5"
-          copyable
-          boxed
-          style="background: #f5f7fa; padding: 10px; border-radius: 4px;"
+        v-if="responseViewType === 'json' && responseData"
+        :value="responseData"
+        :expand-depth="5"
+        copyable
+        boxed
+        style="background: #f5f7fa; padding: 10px; border-radius: 4px;"
       ></json-viewer>
 
       <!-- 文本视图 -->
       <el-input
-          v-else-if="responseViewType === 'text'"
-          type="textarea"
-          :value="responseText"
-          :rows="15"
-          readonly
-          class="response-textarea"
+        v-else-if="responseViewType === 'text'"
+        type="textarea"
+        :value="responseText"
+        :rows="15"
+        readonly
+        class="response-textarea"
       ></el-input>
 
       <!-- 原始视图 -->
       <pre v-else-if="responseViewType === 'raw'" class="raw-response">{{ rawResponse }}</pre>
 
       <!-- 空状态 -->
-      <el-empty description="点击发送按钮执行请求" v-if="!responseData && !responseText"/>
+      <el-empty description="点击发送按钮执行请求" v-if="!responseData && !responseText"></el-empty>
     </div>
 
     <!-- API 文档组件 -->
-    <ApiDocsPanel @use-api="handleUseApi"/>
+    <ApiDocsPanel @use-api="handleUseApi" />
   </div>
 </template>
 
@@ -119,20 +117,11 @@ import JsonViewer from 'vue-json-viewer';
 import ApiDocsPanel from './ApiDocsPanel.vue';
 
 export default {
-  components: {
-    JsonViewer,
-    ApiDocsPanel,
-  },
-  props: {
-    connectParam: Object,
-  },
+  components: { JsonViewer, ApiDocsPanel },
+  props: { connectParam: Object },
   data() {
     return {
-      requestForm: {
-        method: 'GET',
-        endpoint: '',
-        body: '',
-      },
+      requestForm: { method: 'GET', endpoint: '', body: '' },
       isLoading: false,
       responseData: null,
       responseText: '',
@@ -161,59 +150,29 @@ export default {
       if (status >= 400 && status < 500) return 'warning';
       if (status >= 500) return 'danger';
       return 'info';
-    },
-    responseTimeTag() {
-      if (!this.responseTime) return 'info';
-      const time = parseInt(this.responseTime);
-      if (time < 100) return 'success';
-      if (time < 500) return 'warning';
-      return 'danger';
     }
   },
   methods: {
     handleUseApi(api) {
       this.requestForm.method = api.method;
       this.requestForm.endpoint = api.endpoint.replace('{index}', 'your_index');
-
-      // 根据 API 类型自动填充请求体
       if (api.method === 'POST' || api.method === 'PUT') {
         if (api.description.includes('搜索') || api.description.includes('查询')) {
-          this.requestForm.body = JSON.stringify({
-            query: { match_all: {} }
-          }, null, 2);
+          this.requestForm.body = JSON.stringify({ query: { match_all: {} } }, null, 2);
         } else if (api.description.includes('创建索引')) {
           this.requestForm.body = JSON.stringify({
-            settings: {
-              number_of_shards: 3,
-              number_of_replicas: 1
-            },
-            mappings: {
-              properties: {
-                title: { type: 'text' },
-                createTime: { type: 'date' }
-              }
-            }
+            settings: { number_of_shards: 3, number_of_replicas: 1 },
+            mappings: { properties: { title: { type: 'text' }, createTime: { type: 'date' } } }
           }, null, 2);
         }
       }
-
       this.$message.success('已加载 API 模板，请根据实际情况修改');
     },
-
     getPlaceholder() {
-      if (this.bodyType === 'json') {
-        return `请输入 JSON 格式的请求体，例如：
-{
-  "query": {
-    "match_all": {}
-  },
-  "size": 10
-}`;
-      } else {
-        return '请输入请求体内容';
-      }
+      return this.bodyType === 'json'
+        ? `请输入 JSON 格式的请求体，例如：\n{\n  "query": {\n    "match_all": {}\n  },\n  "size": 10\n}`
+        : '请输入请求体内容';
     },
-
     formatJson() {
       try {
         if (!this.requestForm.body.trim()) {
@@ -227,7 +186,6 @@ export default {
         this.$message.error('JSON 格式错误：' + e.message);
       }
     },
-
     compressJson() {
       try {
         if (!this.requestForm.body.trim()) {
@@ -241,95 +199,67 @@ export default {
         this.$message.error('JSON 格式错误：' + e.message);
       }
     },
-
     clearBody() {
       this.requestForm.body = '';
       this.$message.success('已清空请求体');
     },
-
     copyBody() {
       if (!this.requestForm.body) {
         this.$message.warning('没有可复制的内容');
         return;
       }
-      const el = document.createElement('textarea');
-      el.value = this.requestForm.body;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
+      this.copyToClipboard(this.requestForm.body);
       this.$message.success('已复制到剪贴板');
     },
     getParams(operationType) {
-      const params = {
+      return {
         ...this.connectParam,
         operationCategory: this.operationCategory,
-        operationType: operationType,
+        operationType,
         method: this.requestForm.method,
         endpoint: this.requestForm.endpoint,
         body: this.requestForm.body,
       };
-      return params;
     },
-
     async executeRequest() {
       if (!this.requestForm.endpoint) {
         this.$message.warning('请输入 API 端点');
         return;
       }
-
       this.isLoading = true;
       this.responseData = null;
       this.responseText = '';
       this.rawResponse = '';
       this.responseStatus = '';
       this.responseTime = '';
-
       const startTime = Date.now();
-
       try {
         const params = this.getParams("EXECUTE");
         const response = await this.axios.post('/api/elasticsearch/httpOperation', params);
-
         const endTime = Date.now();
         this.responseTime = endTime - startTime;
-
         if (response.data && response.data.code === 200) {
           const result = response.data.data;
-
-          // 尝试解析 JSON
           try {
-            if (typeof result === 'string') {
-              this.responseData = JSON.parse(result);
-            } else {
-              this.responseData = result;
-            }
+            this.responseData = typeof result === 'string' ? JSON.parse(result) : result;
             this.responseText = JSON.stringify(this.responseData, null, 2);
           } catch (e) {
-            // 不是 JSON 格式，按文本处理
             this.responseText = result;
             this.rawResponse = result;
           }
-
           this.rawResponse = this.rawResponse || JSON.stringify(result, null, 2);
           this.responseStatus = response.data.code || '200';
-
-          this.$message({
-            message: '请求成功',
-            type: 'success'
-          });
+          this.$message({ message: '请求成功', type: 'success' });
         } else {
           this.$message.error(response.data.message || '请求失败');
         }
       } catch (error) {
-        console.log(error);
         this.$message.error('请求失败：' + (error.message || '未知错误'));
         this.responseStatus = error.response?.status || 'ERROR';
       } finally {
         this.isLoading = false;
       }
     },
-
     copyResponse() {
       let content = '';
       if (this.responseViewType === 'json' && this.responseData) {
@@ -339,16 +269,9 @@ export default {
       } else {
         content = this.rawResponse;
       }
-
-      const el = document.createElement('textarea');
-      el.value = content;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
+      this.copyToClipboard(content);
       this.$message.success('已复制到剪贴板');
     },
-
     downloadResponse() {
       let content = '';
       if (this.responseViewType === 'json' && this.responseData) {
@@ -358,7 +281,6 @@ export default {
       } else {
         content = this.rawResponse;
       }
-
       const blob = new Blob([content], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -368,29 +290,21 @@ export default {
       URL.revokeObjectURL(url);
       this.$message.success('已下载响应文件');
     },
-
-    resetForm() {
-      this.requestForm = {
-        method: 'GET',
-        endpoint: '',
-        body: '',
-      };
-      this.responseData = null;
-      this.responseText = '';
-      this.rawResponse = '';
-      this.responseStatus = '';
-      this.responseTime = '';
+    copyToClipboard(text) {
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
     }
-  },
+  }
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .curl-container {
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 4px;
 }
 
 .request-section {
@@ -425,7 +339,7 @@ export default {
   align-items: center;
   margin-bottom: 10px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid var(--card-border);
 }
 
 .header-actions {
@@ -437,7 +351,12 @@ export default {
 .section-title {
   font-weight: bold;
   font-size: 14px;
-  color: #303133;
+  color: var(--text-primary);
+
+  i {
+    margin-right: 4px;
+    color: var(--primary);
+  }
 }
 
 .response-actions {
@@ -473,14 +392,14 @@ export default {
   font-size: 13px;
   background-color: #fafafa;
   border: 1px solid #dcdfe6;
-}
 
-.body-textarea:hover {
-  border-color: #c0c4cc;
-}
+  &:hover {
+    border-color: #c0c4cc;
+  }
 
-.body-textarea:focus {
-  border-color: #409EFF;
-  background-color: #fff;
+  &:focus {
+    border-color: #409EFF;
+    background-color: #fff;
+  }
 }
 </style>

@@ -1,214 +1,199 @@
 <template>
-    <div>
-        <!-- 输入文本框和选择分词器 -->
-        <el-form :model="formData" label-width="80px">
-            <!--           输入 字段-->
-<!--            将索引名和字段放在一行-->
-            <el-row>
-                <el-col :span="5">
-                    <el-form-item label="索引名">
-<!--                        <el-input v-model="formData.indexName" placeholder="请输入索引名"></el-input>-->
-                        <el-select v-model="formData.indexName"  filterable clearable  placeholder="查询的索引" style="flex: 1;">
-                            <el-option v-for="item in indexNames" :key="item" :label="item" :value="item"></el-option>
-                        </el-select>
-                        <el-button type="text" size="small" @click="getIndexNames" style="margin-top: 10px;">
-                            刷新索引名
-                        </el-button>
-                    </el-form-item>
-
-                </el-col>
-
-                <el-col :span="5">
-                    <el-form-item label="字段">
-                        <el-input v-model="formData.filed" placeholder="请输入字段名"></el-input>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-
-            <el-form-item label="分词器">
-                <el-select 
-                    v-model="formData.analyzer" 
-                    filterable 
-                    default-first-option 
-                    clearable 
-                    allow-create 
-                    placeholder="请选择或输入分词器">
-                    <!-- 遍历 analyzersMap 对象的键值对，显示 key，返回 value -->
-                    <el-option 
-                        v-for="(value, key) in analyzersMap" 
-                        :key="key" 
-                        :label="key" 
-                        :value="value">
-                    </el-option>
-                </el-select>
-            <el-button type="text" size="small" @click="fetchAnalyzerOperations" style="margin-top: 10px;">
-                刷新分词器
-            </el-button>
-            <el-button type="text" size="small" @click="toggleAnalyzerList" style="margin-top: 10px; margin-left: 10px;">
-                {{ isAnalyzerListVisible ? '隐藏分词器列表' : '显示分词器列表' }}
-            </el-button>
-            </el-form-item>
-            <!-- 分词器列表展示 -->
-            <el-table v-if="isAnalyzerListVisible && analyzers.length > 0" :data="analyzers" style="width: 100%; margin-top: 20px;">
-                <el-table-column label="组件" prop="component"></el-table-column>
-                <el-table-column label="名称" prop="name"></el-table-column>
-                <el-table-column label="版本" prop="version"></el-table-column>
-            </el-table>
-
-            <el-form-item label="文本">
-                <el-input type="textarea" v-model="formData.document" placeholder="请输入文本" rows="4"></el-input>
-            </el-form-item>
-
-            <el-button type="primary" @click="analyzeText">分词</el-button>
-        </el-form>
-
-        <!-- 分词结果展示 -->
-        <el-table :data="analysisResult" style="width: 100%" v-if="analysisResult.length > 0">
-            <el-table-column label="分词结果">
-                <template slot-scope="scope">
-                    {{ scope.row }}
-                </template>
-            </el-table-column>
-        </el-table>
-
-        <!-- 错误信息展示 -->
-        <el-alert v-if="errorMessage" type="error" :title="errorMessage"></el-alert>
+  <div>
+    <!-- 工具栏 -->
+    <div class="app-toolbar">
+      <div class="app-toolbar-left">
+        <h3 class="page-title">分词分析</h3>
+      </div>
     </div>
+
+    <!-- 查询表单 -->
+    <el-form :model="formData" label-width="80px">
+      <el-row :gutter="16">
+        <el-col :xs="24" :sm="12" :md="8">
+          <el-form-item label="索引名">
+            <el-select
+              v-model="formData.indexName"
+              filterable
+              clearable
+              placeholder="选择索引"
+              style="width: 100%"
+            >
+              <el-option
+                v-for="item in indexNames"
+                :key="item"
+                :label="item"
+                :value="item"
+              ></el-option>
+            </el-select>
+            <el-button type="text" size="small" icon="el-icon-refresh" @click="getIndexNames">刷新</el-button>
+          </el-form-item>
+        </el-col>
+        <el-col :xs="24" :sm="12" :md="8">
+          <el-form-item label="字段">
+            <el-input v-model="formData.filed" placeholder="请输入字段名"></el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row :gutter="16">
+        <el-col :xs="24" :sm="16" :md="12">
+          <el-form-item label="分词器">
+            <el-select
+              v-model="formData.analyzer"
+              filterable
+              default-first-option
+              clearable
+              allow-create
+              placeholder="请选择或输入分词器"
+              style="width: 100%"
+            >
+              <el-option
+                v-for="(value, key) in analyzersMap"
+                :key="key"
+                :label="key"
+                :value="value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :xs="24" :sm="8" :md="12">
+          <el-form-item label-width="0">
+            <el-button-group>
+              <el-button type="text" icon="el-icon-refresh" @click="fetchAnalyzerOperations">刷新分词器</el-button>
+              <el-button type="text" icon="el-icon-document" @click="toggleAnalyzerList">
+                {{ isAnalyzerListVisible ? '隐藏列表' : '显示列表' }}
+              </el-button>
+            </el-button-group>
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <!-- 分词器列表 -->
+      <el-table
+        v-if="isAnalyzerListVisible && analyzers.length > 0"
+        :data="analyzers"
+        stripe
+        class="app-table"
+        style="width: 100%; margin-bottom: 20px"
+      >
+        <el-table-column label="组件" prop="component"></el-table-column>
+        <el-table-column label="名称" prop="name"></el-table-column>
+        <el-table-column label="版本" prop="version"></el-table-column>
+      </el-table>
+
+      <el-form-item label="文本">
+        <el-input
+          type="textarea"
+          v-model="formData.document"
+          placeholder="请输入待分词的文本"
+          :rows="4"
+        ></el-input>
+      </el-form-item>
+
+      <el-form-item label-width="80px">
+        <el-button type="primary" icon="el-icon-scissors" @click="analyzeText">分词</el-button>
+      </el-form-item>
+    </el-form>
+
+    <!-- 分词结果 -->
+    <el-table
+      v-if="analysisResult.length > 0"
+      :data="analysisResult"
+      stripe
+      class="app-table"
+      style="width: 100%"
+    >
+      <el-table-column label="分词结果">
+        <template slot-scope="scope">
+          <el-tag size="medium">{{ scope.row }}</el-tag>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- 错误提示 -->
+    <el-alert v-if="errorMessage" type="error" :title="errorMessage" show-icon closable @close="errorMessage = ''"></el-alert>
+  </div>
 </template>
 
 <script>
 export default {
-    props: {
-        connectParam: Object,
+  props: { connectParam: Object },
+  data() {
+    return {
+      formData: {
+        indexName: '',
+        analyzer: '',
+        document: '',
+        filed: ''
+      },
+      analyzers: [],
+      analysisResult: [],
+      operationCategory: "ANALYZE",
+      errorMessage: '',
+      isAnalyzerListVisible: false,
+      analyzersMap: {},
+      indexNames: []
+    };
+  },
+  methods: {
+    getParams(operationType) {
+      return { ...this.connectParam, operationCategory: this.operationCategory, operationType };
     },
-    data() {
-        return {
-            formData: {
-                indexName: '',  // 索引名
-                analyzer: '',  // 分词器，初始化为空，后续从接口获取
-                document: '',  // 输入文本
-                filed: ''
-            },
-            analyzers: [],  // 分词器列表
-            analysisResult: [],  // 存放分词结果
-            operationCategory: "ANALYZE",
-            errorMessage: '',  // 错误信息
-            isAnalyzerListVisible: false,  // 控制分词器列表显示与隐藏
-            analyzersMap: {},
-            indices:[],
-            indexNames: []
-        };
+    async getIndexNames() {
+      const params = this.getParams("INDEX_LIST");
+      params.operationCategory = "INDEX";
+      try {
+        const response = await this.axios.post('/api/elasticsearch/operation', params);
+        const values = response.data.data;
+        this.indexNames = Array.isArray(values) ? values.map(item => item.index) : [];
+      } catch (error) {
+        this.indexNames = [];
+      }
     },
-    methods: {
-        // 获取请求参数
-        getParams(operationType) {
-            const params = this.connectParam;
-            params.operationCategory = this.operationCategory;
-            params.operationType = operationType;
-            return params;
-        },
-            async getIndexNames() {
-            const params = this.getParams("INDEX_LIST");
-            params.operationCategory = "INDEX";
-        
-            try {
-                const response = await this.axios.post('/api/elasticsearch/operation', params);
-                const values = response.data.data;
-        
-                // 确保 values 是数组
-                if (Array.isArray(values)) {
-                    const indexNames = values.map(item => item.index); // 使用 map 简化代码
-                    this.indexNames = indexNames;
-                } else {
-                    console.error('API 返回的值不是数组:', values);
-                    this.indexNames = []; // 设置为空数组以避免错误
-                }
-            } catch (error) {
-                console.error('获取索引名时出错:', error);
-                this.indexNames = []; // 设置为空数组以避免错误
-            }
-        },
-        // 切换分词器列表显示并刷新接口
-        async toggleAnalyzerList() {
-            this.isAnalyzerListVisible = !this.isAnalyzerListVisible;
-
-            if (this.isAnalyzerListVisible) { // 只有显示时才刷新
-                this.errorMessage = '';  // 清除之前错误
-                try {
-                    const params = this.getParams("PLUGINS");
-                    const response = await this.axios.post('/api/elasticsearch/operation', params);
-
-                    // 假设返回的数据在 response.data.data
-                    this.analyzers = Array.isArray(response.data.data)
-                        ? [...response.data.data]
-                        : [...Object.keys(response.data.data)];
-
-                } catch (error) {
-                    this.errorMessage = '无法获取分词器列表。';
-                    console.error(error);
-                }
-            }
-        },
-        // 获取分词器操作列表
-        async fetchAnalyzerOperations() {
-            this.errorMessage = '';  // 清除之前的错误信息
-            try {
-                // 获取请求参数
-                const params = this.getParams("ANALYZERS");
-
-                // 请求后端接口获取分词器列表
-                const response = await this.axios.post('/api/elasticsearch/operation', params);
-
-                // 从 Map 数据中提取出分词器名称
-                this.analyzersMap = response.data.data;  // 提取 Map 的键作为分词器名称
-                console.info(this.analyzersMap)
-                // 默认选择第一个分词器
-                // if (this.analyzersMap.length > 0) {
-                //     this.formData.analyzer = this.analyzersMap;
-                // }
-            } catch (error) {
-                this.errorMessage = '无法获取分词器列表。';
-                console.error(error);
-            }
-
-        },
-
-
-
-        // 分词操作
-        async analyzeText() {
-            this.errorMessage = '';  // 清除之前的错误信息
-            try {
-                // 获取请求参数
-                const params = this.getParams("ANALYZE");
-
-                // 请求数据
-                params.indexName = this.formData.indexName
-                params.document = this.formData.document
-                params.analyzer = this.formData.analyzer
-                params.field = this.formData.filed
-
-                // 发送请求到后端
-                const response = await this.axios.post('/api/elasticsearch/operation', params);
-                this.analysisResult = response.data.data;  // 返回的分词结果
-            } catch (error) {
-                this.errorMessage = '分词失败，请检查输入的索引和文本。';
-                console.error(error);
-            }
+    async toggleAnalyzerList() {
+      this.isAnalyzerListVisible = !this.isAnalyzerListVisible;
+      if (this.isAnalyzerListVisible) {
+        this.errorMessage = '';
+        try {
+          const params = this.getParams("PLUGINS");
+          const response = await this.axios.post('/api/elasticsearch/operation', params);
+          this.analyzers = Array.isArray(response.data.data)
+            ? [...response.data.data]
+            : [...Object.keys(response.data.data)];
+        } catch (error) {
+          this.errorMessage = '无法获取分词器列表。';
         }
+      }
     },
-
-    // 页面加载时获取分词器列表
-    mounted() {
-        // this.fetchAnalyzers();  // 获取分词器列表
-        this.fetchAnalyzerOperations();
-        this.getIndexNames()
+    async fetchAnalyzerOperations() {
+      this.errorMessage = '';
+      try {
+        const params = this.getParams("ANALYZERS");
+        const response = await this.axios.post('/api/elasticsearch/operation', params);
+        this.analyzersMap = response.data.data || {};
+      } catch (error) {
+        this.errorMessage = '无法获取分词器列表。';
+      }
+    },
+    async analyzeText() {
+      this.errorMessage = '';
+      try {
+        const params = this.getParams("ANALYZE");
+        params.indexName = this.formData.indexName;
+        params.document = this.formData.document;
+        params.analyzer = this.formData.analyzer;
+        params.field = this.formData.filed;
+        const response = await this.axios.post('/api/elasticsearch/operation', params);
+        this.analysisResult = response.data.data || [];
+      } catch (error) {
+        this.errorMessage = '分词失败，请检查输入的索引和文本。';
+      }
     }
+  },
+  mounted() {
+    this.fetchAnalyzerOperations();
+    this.getIndexNames();
+  }
 };
 </script>
-
-<style scoped>
-.el-table {
-    margin-top: 20px;
-}
-</style>

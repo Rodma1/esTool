@@ -8,25 +8,28 @@ Vue.use(VueRouter);
 
 const routes = [
   {
-    path: '/', // 程序启动默认路由
+    path: '/',
     component: NavMenuView,
     meta: { title: '整体页面布局' },
-    redirect: '/home', // 重定向到首页
+    redirect: '/home',
     children: [
       {
         path: '/home',
         name: 'home',
-        component: HomeView
+        component: HomeView,
+        meta: { title: '首页', icon: 'el-icon-s-home' }
       },
       {
         path: '/about',
         name: 'about',
-        component: AboutView
+        component: AboutView,
+        meta: { title: '关于我', icon: 'el-icon-info' }
       },
       {
         path: '/elasticsearch',
         name: 'elasticsearch',
         component: ElasticsearchView,
+        meta: { title: 'ES 操作', icon: 'el-icon-s-data' }
       }
     ]
   }
@@ -35,8 +38,5 @@ const routes = [
 const router = new VueRouter({
   routes
 });
-
-
-
 
 export default router;
