@@ -48,6 +48,7 @@
           <el-button size="mini" type="danger" @click="clearBody" title="清空">
             <i class="el-icon-delete"></i> 清空
           </el-button>
+          <el-button size="mini" type="primary" icon="el-icon-magic-stick" @click="aiGenerateBody">AI 生成</el-button>
         </div>
       </div>
       <el-input
@@ -58,6 +59,21 @@
         class="body-textarea"
       ></el-input>
     </div>
+
+    <!-- AI 生成弹窗 -->
+    <el-dialog title="AI 生成请求体" :visible.sync="aiDialogVisible" width="600px">
+      <el-input
+        v-model="aiInput"
+        type="textarea"
+        :rows="4"
+        placeholder="描述你需要的请求体，例如：按状态聚合统计文档数量"
+        resize="none"
+      ></el-input>
+      <div slot="footer">
+        <el-button @click="aiDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="aiLoading" @click="confirmAiGenerate">生成</el-button>
+      </div>
+    </el-dialog>
 
     <!-- 响应结果区域 -->
     <div class="response-section">
@@ -129,6 +145,9 @@ export default {
       responseStatus: '',
       responseTime: '',
       bodyType: 'json',
+      aiDialogVisible: false,
+      aiInput: '',
+      aiLoading: false,
       responseViewType: 'json',
       operationCategory: "HTTP",
     }
@@ -297,6 +316,48 @@ export default {
       el.select();
       document.execCommand('copy');
       document.body.removeChild(el);
+    },
+    aiGenerateBody() {
+      this.aiDialogVisible = true;
+      this.aiInput = '';
+    },
+    async confirmAiGenerate() {
+      const input = this.aiInput.trim();
+      if (!input) {
+        this.$message.warning('请输入描述');
+        return;
+      }
+      this.aiLoading = true;
+      try {
+        const response = await this.axios.post('/api/ai/generate-query', {
+          userInput: '请生成一个 Elasticsearch 请求体（JSON），用于：' + input,
+          connectParam: this.connectParam
+        });
+        if (response.data && response.data.code === 200) {
+          const data = response.data.data;
+          if (data.dsl) {
+            // 尝试解析 DSL 并格式化
+            let dsl = data.dsl;
+            try {
+              const parsed = JSON.parse(dsl);
+              dsl = JSON.stringify(parsed, null, 2);
+            } catch (e) {
+              // 保持原样
+            }
+            this.requestForm.body = dsl;
+            this.$message.success('请求体已生成');
+            this.aiDialogVisible = false;
+          } else {
+            this.$message.warning('AI 未生成有效请求体');
+          }
+        } else {
+          this.$message.error(response.data.message || '生成失败');
+        }
+      } catch (error) {
+        this.$message.error('生成异常：' + (error.message || '网络错误'));
+      } finally {
+        this.aiLoading = false;
+      }
     }
   }
 }

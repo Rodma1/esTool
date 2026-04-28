@@ -26,6 +26,10 @@
             <i class="el-icon-s-data"></i>
             <span slot="title">ES 操作</span>
           </el-menu-item>
+          <el-menu-item index="/ai-assistant">
+            <i class="el-icon-magic-stick"></i>
+            <span slot="title">AI 助手</span>
+          </el-menu-item>
           <el-menu-item index="/about">
             <i class="el-icon-info"></i>
             <span slot="title">关于我</span>

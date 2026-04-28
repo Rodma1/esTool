@@ -168,6 +168,66 @@ src/
 - 表格列在小屏幕自动隐藏/调整
 - DocumentView 在中等屏幕以下改为上下堆叠布局
 
+## 2025-04-27 AI 智能助手模块
+
+基于大语言模型（LLM）的 ES 智能查询与问答系统，让用户可以用自然语言操作 Elasticsearch。
+
+### 功能概览
+
+1. **ES 问答模式**：解答 Elasticsearch 概念、语法、调优等问题
+2. **智能查询模式**：输入自然语言，AI 自动生成 ES DSL 并执行，返回结果和解释
+3. **知识库**：建立索引-业务语义映射，让 AI 知道「新闻」对应哪些索引
+4. **现有页面增强**：DocumentView 和 CurlView 均支持 AI 辅助生成查询
+5. **历史沉淀**：成功查询自动保存到 ES 索引 `.es-tool-ai-history`，支持热查询推荐和模式复用
+
+### 项目结构更新
+
+```
+src/
+├── views/
+│   └── AIAssistantView.vue       # AI 助手主页面
+├── components/ai/
+│   └── AIFillModal.vue           # DocumentView AI 查询弹窗
+```
+
+后端新增 `com.chen.controller.ai`、`com.chen.service.ai`、`com.chen.model.ai` 包。
+
+### 配置说明
+
+**后端 `application.yml`**：
+```yaml
+ai:
+  llm:
+    provider: openai
+    api-key: ${AI_API_KEY:}              # 建议通过环境变量注入
+    base-url: https://api.openai.com/v1  # 可替换为代理或兼容 API
+    model: gpt-4o-mini
+    timeout: 60
+    max-tokens: 4096
+```
+
+**知识库文件**：`backend/data/esKnowledgeBase.json`
+- 支持 AI 自动生成草稿 + 人工审核
+- 格式：`[{ businessName, indices, description, fields }]`
+
+### API 接口
+
+| 接口 | 说明 |
+|------|------|
+| `POST /api/ai/chat` | AI 通用对话 |
+| `POST /api/ai/generate-query` | 自然语言生成 DSL |
+| `POST /api/ai/execute-query` | 生成 DSL 并执行 |
+| `POST /api/ai/indices` | 获取索引目录 |
+| `GET/POST /api/ai/knowledge-base` | 知识库读写 |
+| `POST /api/ai/generate-kb-draft` | AI 生成知识库草稿 |
+| `POST /api/ai/hot-queries` | 热查询推荐 |
+
+### 安全说明
+
+- AI 默认只生成查询类 DSL（search / count / aggregate）
+- 执行前校验拒绝 `delete` / `update` / `index` 等写入操作
+- API Key 建议通过环境变量注入，避免硬编码
+
 ## 代理配置
 
 前端开发服务器通过 `/api/` 前缀代理到后端 `http://localhost:8089/`，配置在 `vue.config.js` 中。

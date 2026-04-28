@@ -1,5 +1,6 @@
 <template>
-  <el-row :gutter="16" class="doc-layout">
+  <div>
+    <el-row :gutter="16" class="doc-layout">
     <!-- 左侧查询面板 -->
     <el-col :xs="24" :sm="24" :md="10" :lg="8">
       <div class="app-card query-panel">
@@ -9,6 +10,7 @@
         <div class="query-actions">
           <el-button type="primary" icon="el-icon-refresh" size="small" @click="refreshList">查询</el-button>
           <el-button icon="el-icon-refresh-left" size="small" @click="clearAllConditions">清空</el-button>
+          <el-button type="success" icon="el-icon-magic-stick" size="small" @click="openAiModal">AI 查询</el-button>
           <el-dropdown trigger="click" @command="handleHistoryClick" v-if="queryHistory.length > 0">
             <el-button icon="el-icon-time" size="small">历史</el-button>
             <el-dropdown-menu slot="dropdown">
@@ -262,14 +264,22 @@
         ></el-pagination>
       </div>
     </el-col>
+
+    <!-- AI 智能查询弹窗 -->
+    <ai-fill-modal ref="aiFillModal" :connect-param="connectParam"></ai-fill-modal>
   </el-row>
+  </div>
 </template>
 
 <script>
+import AIFillModal from '@/components/ai/AIFillModal.vue';
+
 const HISTORY_KEY = 'es_doc_query_history';
 const HISTORY_MAX = 5;
 
 export default {
+  // eslint-disable-next-line vue/no-unused-components
+  components: { AIFillModal },
   props: { connectParam: Object },
   filters: {
     formatNumber(val) {
@@ -527,6 +537,9 @@ export default {
       this.resultFilter = '';
       this.activeCollapse = ['basic'];
       this.$message.success('查询条件已清空');
+    },
+    openAiModal() {
+      this.$refs.aiFillModal.open();
     },
     getIndexColor(indexName) {
       return this.indexColorMap[indexName] || '#909399';

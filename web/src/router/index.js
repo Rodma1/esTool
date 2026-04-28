@@ -4,6 +4,7 @@ import HomeView from '../views/HomeView.vue';
 import NavMenuView from '../views/MenuView.vue';
 import ElasticsearchView from '../views/ElasticsearchView.vue';
 import AboutView from "@/views/AboutView.vue";
+import AIAssistantView from "@/views/AIAssistantView.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -30,6 +31,12 @@ const routes = [
         name: 'elasticsearch',
         component: ElasticsearchView,
         meta: { title: 'ES 操作', icon: 'el-icon-s-data' }
+      },
+      {
+        path: '/ai-assistant',
+        name: 'ai-assistant',
+        component: AIAssistantView,
+        meta: { title: 'AI 助手', icon: 'el-icon-magic-stick' }
       }
     ]
   }
