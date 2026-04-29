@@ -78,10 +78,35 @@ export default {
         this.$message.error('获取连接配置失败')
       }
     },
-    quickConnect(conn) {
-      this.$store.dispatch('setActiveConnection', conn)
-      this.$message.success(`已选择连接: ${conn.hostName}:${conn.port}`)
-      this.$router.push('/elasticsearch')
+    async quickConnect(conn) {
+      const loading = this.$loading({
+        lock: true,
+        text: `正在连接 ${conn.hostName}:${conn.port}...`,
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      })
+      try {
+        const params = { ...conn, operationCategory: 'INFO' }
+        const response = await this.axios.post('/api/elasticsearch/operation', params)
+        if (response.data.code !== 200) {
+          this.$message.error(response.data.message || '连接失败')
+          return
+        }
+        const versionInfo = response.data.data
+        const enrichedConn = {
+          ...conn,
+          versionNumber: versionInfo.number,
+          buildType: versionInfo.buildType,
+          luceneVersion: versionInfo.luceneVersion
+        }
+        this.$store.dispatch('setActiveConnection', enrichedConn)
+        this.$message.success(`连接成功: ${conn.hostName}:${conn.port} (v${versionInfo.number})`)
+        this.$router.push('/elasticsearch')
+      } catch (error) {
+        this.$message.error(`连接失败: ${error.message || '网络错误'}`)
+      } finally {
+        loading.close()
+      }
     },
     goToEsPage() {
       this.$router.push('/elasticsearch')

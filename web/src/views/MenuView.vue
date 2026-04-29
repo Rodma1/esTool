@@ -53,6 +53,9 @@
               <span class="connection-text">
                 {{ activeConnection.hostName }}:{{ activeConnection.port }}
               </span>
+              <el-tag v-if="activeConnection.versionNumber" size="mini" type="success" effect="plain" class="version-tag">
+                v{{ activeConnection.versionNumber }}
+              </el-tag>
             </div>
             <div v-else class="connection-badge">
               <span class="status-dot gray"></span>
@@ -232,6 +235,13 @@ export default {
       .connection-text {
         color: var(--text-primary);
         font-weight: 500;
+      }
+
+      .version-tag {
+        margin-left: 4px;
+        font-size: 11px;
+        line-height: 1;
+        padding: 0 4px;
       }
     }
 

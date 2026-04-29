@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +41,19 @@ public class AIAssistantService {
         } catch (Exception e) {
             log.error("AI 对话失败", e);
             return AIChatResponse.error("AI 对话失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 流式 AI 对话（问答模式）
+     */
+    public void chatStream(AIChatRequest request, Consumer<String> tokenConsumer) {
+        try {
+            List<ChatMessage> messages = buildMessages(request, PromptTemplate.qaSystemPrompt());
+            llmClient.chatCompletionStream(messages, tokenConsumer);
+        } catch (Exception e) {
+            log.error("AI 流式对话失败", e);
+            tokenConsumer.accept("\n\n[错误] AI 对话失败: " + e.getMessage());
         }
     }
 

@@ -186,6 +186,13 @@ export default {
         if (conn) {
           this.form = { ...this.form, ...conn };
           this.selectHostName = conn.hostName + ':' + conn.port + ':' + conn.version;
+          if (conn.versionNumber && conn.versionNumber !== '-') {
+            this.versionInfo = {
+              number: conn.versionNumber,
+              buildType: conn.buildType || '-',
+              luceneVersion: conn.luceneVersion || '-'
+            };
+          }
           this.isConnectionExpanded = false;
         }
       }
@@ -203,7 +210,12 @@ export default {
         this.$message({ message: '连接成功', type: 'success' });
         this.versionInfo = response.data.data;
         this.activeName = '';
-        this.$store.dispatch('setActiveConnection', { ...this.form });
+        this.$store.dispatch('setActiveConnection', {
+          ...this.form,
+          versionNumber: this.versionInfo.number,
+          buildType: this.versionInfo.buildType,
+          luceneVersion: this.versionInfo.luceneVersion
+        });
         this.isConnectionExpanded = false;
       } catch (error) {
         this.$message.error('连接失败');

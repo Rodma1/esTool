@@ -12,7 +12,12 @@ import com.chen.service.ai.KnowledgeBaseService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import javax.servlet.http.HttpServletResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +26,7 @@ import java.util.Map;
  * AI 助手控制器
  */
 @RequiredArgsConstructor
+@Slf4j
 @RestController
 @Api(value = "AI助手", tags = "AI智能助手接口")
 @RequestMapping("/ai")
@@ -38,6 +44,47 @@ public class AIAssistantController {
     public ResultData<AIChatResponse> chat(@RequestBody AIChatRequest request) {
         AIChatResponse response = aiAssistantService.chat(request);
         return buildResult(response);
+    }
+
+    /**
+     * AI 流式对话（SSE）
+     */
+    @ApiOperation("AI流式对话")
+    @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter chatStream(@RequestBody AIChatRequest request, HttpServletResponse response) {
+        // 禁用 Undertow/Servlet 缓冲，确保 SSE 即时推送
+        response.setHeader("X-Accel-Buffering", "no");
+        response.setHeader("Cache-Control", "no-cache");
+
+        SseEmitter emitter = new SseEmitter(600_000L);
+
+        new Thread(() -> {
+            try {
+                aiAssistantService.chatStream(request, token -> {
+                    try {
+                        emitter.send(SseEmitter.event().data(token));
+                    } catch (Exception e) {
+                        log.warn("SSE 发送失败，客户端可能已断开", e);
+                        emitter.completeWithError(e);
+                    }
+                });
+                emitter.send(SseEmitter.event().name("done").data("[DONE]"));
+                emitter.complete();
+            } catch (Exception e) {
+                log.error("流式对话异常", e);
+                try {
+                    emitter.send(SseEmitter.event().name("error").data(e.getMessage()));
+                    emitter.completeWithError(e);
+                } catch (Exception ex) {
+                    emitter.completeWithError(ex);
+                }
+            }
+        }).start();
+
+        emitter.onTimeout(() -> log.warn("SSE 连接超时"));
+        emitter.onError(ex -> log.warn("SSE 连接异常", ex));
+
+        return emitter;
     }
 
     /**

@@ -9,6 +9,12 @@
         </el-radio-group>
       </div>
       <div class="app-toolbar-right">
+        <el-switch
+          v-model="streamMode"
+          active-text="流式"
+          inactive-text="非流式"
+          class="stream-toggle"
+        ></el-switch>
         <el-button size="small" icon="el-icon-notebook-2" @click="openKbDialog">知识库</el-button>
         <el-button size="small" icon="el-icon-brush" @click="clearChat">清空对话</el-button>
       </div>
@@ -87,7 +93,7 @@
         </div>
 
         <!-- AI 正在思考 -->
-        <div v-if="isLoading" class="message-item message-assistant">
+        <div v-if="isLoading && !isStreaming" class="message-item message-assistant">
           <div class="message-avatar">
             <i class="el-icon-magic-stick"></i>
           </div>
@@ -131,6 +137,9 @@ export default {
       currentMode: 'chat',
       userInput: '',
       isLoading: false,
+      isStreaming: false,
+      streamMode: true,
+      streamAbortController: null,
       messages: [],
       hotQueries: [],
       kbDialogVisible: false,
@@ -166,6 +175,10 @@ export default {
       }
     },
     async sendMessage() {
+      if (this.streamMode && this.currentMode === 'chat') {
+        return this.sendMessageStream();
+      }
+
       const input = this.userInput.trim();
       if (!input || this.isLoading) return;
 
@@ -211,13 +224,113 @@ export default {
         this.isLoading = false;
       }
     },
+    async sendMessageStream() {
+      const input = this.userInput.trim();
+      if (!input || this.isLoading) return;
+
+      this.messages.push({
+        role: 'user',
+        content: input
+      });
+      this.userInput = '';
+
+      const assistantMessage = { role: 'assistant', content: '' };
+      this.messages.push(assistantMessage);
+      const msgIndex = this.messages.length - 1;
+      this.isLoading = true;
+      this.isStreaming = true;
+
+      try {
+        this.streamAbortController = new AbortController();
+
+        const requestBody = {
+          userInput: input,
+          messages: this.messages
+            .filter(m => m.role === 'user' || (m.role === 'assistant' && m.content))
+            .map(m => ({ role: m.role, content: m.content })),
+          connectParam: this.activeConnection,
+          stream: true
+        };
+
+        const response = await fetch('/api/ai/chat/stream', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+          signal: this.streamAbortController.signal
+        });
+
+        if (!response.ok) {
+          throw new Error('HTTP ' + response.status);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('event:error')) {
+              continue;
+            }
+            if (line.startsWith('data:')) {
+              const data = line.substring(5).trim();
+              if (data === '[DONE]') continue;
+              assistantMessage.content += data;
+              this.$set(this.messages, msgIndex, { ...assistantMessage });
+            }
+          }
+        }
+
+        if (buffer.startsWith('data:')) {
+          const data = buffer.substring(5).trim();
+          if (data !== '[DONE]') {
+            assistantMessage.content += data;
+            this.$set(this.messages, msgIndex, { ...assistantMessage });
+          }
+        }
+
+        if (!assistantMessage.content) {
+          assistantMessage.content = 'AI 未返回内容';
+          this.$set(this.messages, msgIndex, { ...assistantMessage });
+        }
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          if (!assistantMessage.content) {
+            assistantMessage.content = '（已取消）';
+            this.$set(this.messages, msgIndex, { ...assistantMessage });
+          }
+        } else {
+          if (!assistantMessage.content) {
+            assistantMessage.content = '请求异常：' + (error.message || '网络错误');
+          } else {
+            assistantMessage.content += '\n\n[连接中断: ' + error.message + ']';
+          }
+          this.$set(this.messages, msgIndex, { ...assistantMessage });
+        }
+      } finally {
+        this.isLoading = false;
+        this.isStreaming = false;
+        this.streamAbortController = null;
+      }
+    },
     clearChat() {
       this.messages = [];
     },
     scrollToBottom() {
       const container = this.$refs.messageContainer;
       if (container) {
-        container.scrollTop = container.scrollHeight;
+        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+        if (isNearBottom || !this.isStreaming) {
+          container.scrollTop = container.scrollHeight;
+        }
       }
     },
     formatMessage(text) {
@@ -559,6 +672,14 @@ export default {
 
   ::v-deep .el-textarea__inner {
     background: #fafafa;
+  }
+}
+
+.stream-toggle {
+  margin-right: 8px;
+
+  ::v-deep .el-switch__label {
+    font-size: 12px;
   }
 }
 </style>
