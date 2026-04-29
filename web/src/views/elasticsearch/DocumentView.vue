@@ -2,9 +2,12 @@
   <div>
     <el-row :gutter="16" class="doc-layout">
     <!-- 左侧查询面板 -->
-    <el-col :xs="24" :sm="24" :md="10" :lg="8">
+    <el-col v-show="!leftCollapsed" :xs="24" :sm="24" :md="10" :lg="8">
       <div class="app-card query-panel">
-        <div class="panel-title"><i class="el-icon-search"></i> 查询条件</div>
+        <div class="panel-title">
+          <span><i class="el-icon-search"></i> 查询条件</span>
+          <el-button type="text" size="mini" icon="el-icon-s-fold" @click="leftCollapsed = true" title="收起面板"></el-button>
+        </div>
 
         <!-- 顶部操作栏 -->
         <div class="query-actions">
@@ -96,11 +99,14 @@
     </el-col>
 
     <!-- 右侧结果面板 -->
-    <el-col :xs="24" :sm="24" :md="14" :lg="16">
+    <el-col :xs="24" :sm="24" :md="leftCollapsed ? 24 : 14" :lg="leftCollapsed ? 24 : 16">
       <div class="app-card result-panel">
         <!-- 头部：标题 + 视图切换 -->
         <div class="result-header">
-          <div class="panel-title"><i class="el-icon-document"></i> 查询结果</div>
+          <div class="panel-title">
+            <el-button v-if="leftCollapsed" type="text" size="mini" icon="el-icon-s-unfold" @click="leftCollapsed = false" title="展开查询面板" style="margin-right:6px"></el-button>
+            <i class="el-icon-document"></i> 查询结果
+          </div>
           <el-radio-group v-model="viewMode" size="mini">
             <el-radio-button label="table"><i class="el-icon-s-grid"></i> 表格</el-radio-button>
             <el-radio-button label="card"><i class="el-icon-s-order"></i> 卡片</el-radio-button>
@@ -205,8 +211,9 @@
                 <span class="field-summary">{{ getFieldSummary(scope.row.source) }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="120" fixed="right">
+            <el-table-column label="操作" width="150" fixed="right">
               <template slot-scope="scope">
+                <el-button type="text" size="mini" icon="el-icon-view" @click="showDetail(scope.row)">查看</el-button>
                 <el-button type="text" size="mini" icon="el-icon-document-copy" @click="copyJson(scope.row)">复制</el-button>
                 <el-button type="text" class="text-danger" size="mini" icon="el-icon-delete" @click="deleteSingle(scope.row)">删除</el-button>
               </template>
@@ -229,6 +236,9 @@
                   <el-tag size="mini" type="info">{{ item.id }}</el-tag>
                 </div>
                 <div class="json-actions">
+                  <el-tooltip content="查看">
+                    <el-button type="text" size="mini" icon="el-icon-view" @click="showDetail(item)"></el-button>
+                  </el-tooltip>
                   <el-tooltip content="展开/折叠">
                     <el-button type="text" size="mini"
                       :icon="expandedItems.includes(item.id) ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"
@@ -264,6 +274,27 @@
         ></el-pagination>
       </div>
     </el-col>
+
+    <!-- 单条数据详情弹窗 -->
+    <el-dialog
+      :title="detailItem ? detailItem.index + ' / ' + detailItem.id : '文档详情'"
+      :visible.sync="detailDialogVisible"
+      width="70%"
+      top="5vh"
+      :close-on-click-modal="true"
+    >
+      <json-viewer
+        v-if="detailItem"
+        :value="detailItem.source"
+        :expand-depth="10"
+        copyable
+        boxed
+      ></json-viewer>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="detailDialogVisible = false">关闭</el-button>
+        <el-button type="primary" icon="el-icon-document-copy" @click="copyJson(detailItem)">复制 JSON</el-button>
+      </span>
+    </el-dialog>
 
     <!-- AI 智能查询弹窗 -->
     <ai-fill-modal ref="aiFillModal" :connect-param="connectParam"></ai-fill-modal>
@@ -317,7 +348,10 @@ export default {
       loading: false,
       indexColorMap: {},
       viewMode: 'table',
-      tableSelected: []
+      tableSelected: [],
+      leftCollapsed: false,
+      detailDialogVisible: false,
+      detailItem: null
     };
   },
   computed: {
@@ -540,6 +574,10 @@ export default {
     },
     openAiModal() {
       this.$refs.aiFillModal.open();
+    },
+    showDetail(item) {
+      this.detailItem = item;
+      this.detailDialogVisible = true;
     },
     getIndexColor(indexName) {
       return this.indexColorMap[indexName] || '#909399';
