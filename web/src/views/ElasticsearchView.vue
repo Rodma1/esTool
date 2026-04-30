@@ -53,6 +53,9 @@
               <el-button type="primary" icon="el-icon-connection" :plain="true" @click="linkTest">
                 连接测试
               </el-button>
+              <el-button type="success" icon="el-icon-folder-add" :plain="true" @click="saveConnection">
+                保存连接
+              </el-button>
             </el-col>
           </el-row>
 
@@ -219,6 +222,24 @@ export default {
         this.isConnectionExpanded = false;
       } catch (error) {
         this.$message.error('连接失败');
+      }
+    },
+    async saveConnection() {
+      if (!this.form.hostName || !this.form.port) {
+        this.$message.warning('请先填写 IP 地址和端口');
+        return;
+      }
+      try {
+        const params = { ...this.form, port: Number(this.form.port) };
+        const response = await this.axios.post('/api/elasticsearch/connectParam', params);
+        if (response.data.code !== 200) {
+          this.$message.error(response.data.message || '保存失败');
+          return;
+        }
+        this.$message.success('连接配置已保存');
+        this.getConnectForm();
+      } catch (error) {
+        this.$message.error('保存连接失败');
       }
     },
     handleTabClick(tab) {

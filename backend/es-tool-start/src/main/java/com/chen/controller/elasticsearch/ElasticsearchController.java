@@ -4,6 +4,7 @@ import com.chen.common.utils.BeanUtils;
 import com.chen.common.utils.json.FastJsonUtils;
 import com.chen.common.utils.json.ReadJsonUtils;
 import com.chen.common.utils.resultreturn.ResultData;
+import com.chen.common.utils.resultreturn.ResultStatus;
 import com.chen.controller.elasticsearch.domin.OperationCommand;
 import com.chen.domain.elsaticsearch.ElasticsearchConnectParam;
 import com.chen.domain.elsaticsearch.ElasticsearchFactoryParam;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Author chenyunzhi
@@ -60,6 +62,38 @@ public class ElasticsearchController {
 
         return ResultData.success(elasticsearchService.httpOperation(
                 operationCommand));
+    }
+
+    @ApiOperation("新增ES连接配置")
+    @PostMapping("/connectParam")
+    public ResultData<Void> addConnectParam(@RequestBody ElasticsearchConnectParam param) {
+        String path = NavigateConfig.getEsConnectParamPath();
+        String json = ReadJsonUtils.readJsonFile(path);
+        List<ElasticsearchConnectParam> list = FastJsonUtils.toList(json, ElasticsearchConnectParam.class);
+        boolean exists = list.stream()
+                .anyMatch(p -> Objects.equals(p.getHostName(), param.getHostName())
+                        && Objects.equals(p.getPort(), param.getPort()));
+        if (exists) {
+            return ResultData.error(ResultStatus.error("该连接已存在"));
+        }
+        list.add(param);
+        ReadJsonUtils.writeJsonFile(path, FastJsonUtils.toJSONString(list));
+        return ResultData.success();
+    }
+
+    @ApiOperation("删除ES连接配置")
+    @DeleteMapping("/connectParam")
+    public ResultData<Void> deleteConnectParam(@RequestBody ElasticsearchConnectParam param) {
+        String path = NavigateConfig.getEsConnectParamPath();
+        String json = ReadJsonUtils.readJsonFile(path);
+        List<ElasticsearchConnectParam> list = FastJsonUtils.toList(json, ElasticsearchConnectParam.class);
+        boolean removed = list.removeIf(p -> Objects.equals(p.getHostName(), param.getHostName())
+                && Objects.equals(p.getPort(), param.getPort()));
+        if (!removed) {
+            return ResultData.error(ResultStatus.error("连接不存在"));
+        }
+        ReadJsonUtils.writeJsonFile(path, FastJsonUtils.toJSONString(list));
+        return ResultData.success();
     }
 
 }

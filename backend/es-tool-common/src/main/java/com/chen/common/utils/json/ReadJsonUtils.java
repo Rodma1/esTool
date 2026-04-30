@@ -25,4 +25,18 @@ public class ReadJsonUtils {
         }
         return jsonString; // 如果文件读取失败，则返回 null
     }
+
+    public static boolean writeJsonFile(String filename, String content) {
+        File jsonFile = new File(filename);
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(jsonFile), StandardCharsets.UTF_8)) {
+            writer.write(content);
+            writer.flush();
+            return true;
+        } catch (FileNotFoundException e) {
+            log.error("File not found: {}", filename, e);
+        } catch (IOException e) {
+            log.error("Error writing file: {}", filename, e);
+        }
+        return false;
+    }
 }
