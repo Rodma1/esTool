@@ -177,16 +177,25 @@ public class DocOperationStrategy implements ElasticsearchOperationStrategy {
         List<Query> filterQuery = new ArrayList<>();
         // 判断是否需要加入时间条件查询
         if (ObjectUtil.isNotNull(timeSearch) && StringUtils.isNotBlank(timeSearch.getBeginTime()) && StringUtils.isNotBlank(timeSearch.getEndTime()) && StringUtils.isNotBlank(timeSearch.getField()) ) {
-            Query rangeQuery = Query.of(q -> q
-                    .range(r -> r
-                            .date(d -> d
-                                    .field(timeSearch.getField())
-                                    .gte(timeSearch.getBeginTime())
-                                    .lte(timeSearch.getEndTime())
-                            )
-                    )
-            );
-            filterQuery.add(rangeQuery);
+            String formatType = timeSearch.getFormatType();
+            if ("date_string".equals(formatType)) {
+                // 日期字符串格式
+                Query rangeQuery = Query.of(q -> q
+                        .range(r -> r
+                                .date(d -> d
+                                        .field(timeSearch.getField())
+                                        .gte(timeSearch.getBeginTime())
+                                        .lte(timeSearch.getEndTime())
+                                )
+                        )
+                );
+                filterQuery.add(rangeQuery);
+            } else {
+                // 时间戳格式（默认）
+                double begin = DateTimeUtils.toDate(timeSearch.getBeginTime(), DateTimeUtils.y4M2d2H2m2s2).getTime();
+                double end = DateTimeUtils.toDate(timeSearch.getEndTime(), DateTimeUtils.y4M2d2H2m2s2).getTime();
+                filterQuery.add(Query.of(q -> q.range(r -> r.number(n -> n.field(timeSearch.getField()).gte(begin).lte(end)))));
+            }
         }
 
         if (ObjectUtil.isNotNull(searchFields)) {

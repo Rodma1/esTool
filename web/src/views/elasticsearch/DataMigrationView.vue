@@ -37,7 +37,7 @@
         <!-- 条件筛选区 -->
         <div v-if="exportForm.mode === 'filter'" class="filter-area">
           <el-row :gutter="16">
-            <el-col :span="12">
+            <el-col :span="8">
               <el-form-item label="时间范围">
                 <el-date-picker v-model="exportForm.timeSearch.times" type="datetimerange" range-separator="至"
                   start-placeholder="开始" end-placeholder="结束" value-format="yyyy-MM-dd HH:mm:ss"
@@ -45,9 +45,17 @@
                 ></el-date-picker>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <el-col :span="8">
               <el-form-item label="时间字段">
                 <el-input v-model="exportForm.timeSearch.field" placeholder="时间字段名" size="small"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="时间格式">
+                <el-select v-model="exportForm.timeSearch.formatType" placeholder="选择格式" style="width: 100%" size="small">
+                  <el-option label="时间戳(毫秒)" value="timestamp"></el-option>
+                  <el-option label="日期字符串" value="date_string"></el-option>
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
@@ -336,7 +344,7 @@ export default {
         idsText: '',
         searchFields: [],
         termsFields: [],
-        timeSearch: { times: [], field: '' }
+        timeSearch: { times: [], field: '', formatType: 'timestamp' }
       },
       exportLoading: false,
       exportResult: false,
@@ -480,7 +488,8 @@ export default {
             params.timeSearch = {
               beginTime: this.exportForm.timeSearch.times[0],
               endTime: this.exportForm.timeSearch.times[1],
-              field: this.exportForm.timeSearch.field
+              field: this.exportForm.timeSearch.field,
+              formatType: this.exportForm.timeSearch.formatType || 'timestamp'
             };
           }
         }

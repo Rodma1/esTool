@@ -25,4 +25,10 @@ public class ElasticsearchTimeSearch {
      * 时间字段
      */
     private String field;
+
+    /**
+     * 时间格式类型: timestamp(时间戳毫秒), date_string(日期字符串如 2024-01-01T00:00:00)
+     * 默认 timestamp
+     */
+    private String formatType;
 }
