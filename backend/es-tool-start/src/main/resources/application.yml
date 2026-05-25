@@ -23,8 +23,8 @@ server:
 
 navigate:
   # es连接下载路径
-  esConnectParamPath: D:\study\code\mycode\esTool\backend\data\esConnectParam.json
-  analyzersParamPath: D:\study\code\mycode\esTool\backend\data\analyzersParam.json
+  esConnectParamPath: D:\chen\study\code\mycode\esTool\backend\data\esConnectParam.json
+  analyzersParamPath: D:\chen\study\code\mycode\esTool\backend\data\analyzersParam.json
 
 # Spring配置
 spring:
@@ -36,6 +36,22 @@ spring:
     basename: i18n/messages
 ---
 
+
+# AI 大模型配置
+ai:
+  llm:
+    # 提供商: openai / claude / custom
+    provider: openai
+    # API Key，建议通过环境变量 AI_API_KEY 注入
+    api-key:
+    # 请求基础地址，可替换为代理或兼容 API（如 DeepSeek、通义千问）
+    base-url: http://10.18.121.79:4000/v1
+    # 默认模型
+    model: doubao-seed-2.0-code
+    # 请求超时（秒）
+    timeout: 600
+    # 最大返回 token 数
+    max-tokens: 4096
 
 # Swagger配置
 swagger:

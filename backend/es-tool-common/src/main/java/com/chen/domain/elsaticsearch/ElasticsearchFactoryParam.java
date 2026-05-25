@@ -69,6 +69,9 @@ public class ElasticsearchFactoryParam implements Serializable {
     @ApiModelProperty("查询字段")
     public List<SearchFields> searchFields;
 
+    @ApiModelProperty("多值字段查询（terms）")
+    public List<TermsSearchFields> termsFields;
+
     @ApiModelProperty("时间查询")
     public ElasticsearchTimeSearch timeSearch;
 

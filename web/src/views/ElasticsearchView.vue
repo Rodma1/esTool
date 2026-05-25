@@ -139,6 +139,9 @@
         <el-tab-pane label="HTTP 调试" name="seventh">
           <CurlView :connectParam="form" />
         </el-tab-pane>
+        <el-tab-pane label="数据迁移" name="migration">
+          <DataMigrationView :connectParam="form" />
+        </el-tab-pane>
       </el-tabs>
     </div>
   </div>
@@ -152,9 +155,10 @@ import TemplateView from "./elasticsearch/TemplateView.vue"
 import TaskView from "@/views/elasticsearch/TaskView.vue";
 import AnalyzeView from "@/views/elasticsearch/AnalyzeView.vue";
 import CurlView from "@/views/elasticsearch/CurlView.vue";
+import DataMigrationView from "@/views/elasticsearch/DataMigrationView.vue";
 
 export default {
-  components: { CurlView, TaskView, ElasticIndicesView, DocumentView, AliasesView, TemplateView, AnalyzeView },
+  components: { CurlView, TaskView, ElasticIndicesView, DocumentView, AliasesView, TemplateView, AnalyzeView, DataMigrationView },
   data() {
     return {
       form: {

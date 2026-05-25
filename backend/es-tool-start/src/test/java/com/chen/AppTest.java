@@ -1,8 +1,13 @@
 package com.chen;
 
+import com.chen.controller.elasticsearch.domin.OperationCommand;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Unit test for simple App.
@@ -25,7 +30,11 @@ public class AppTest
      */
     public static Test suite()
     {
-        return new TestSuite( AppTest.class );
+        String a = null;
+        List<String> list = Arrays.asList(a, "sdf");
+        System.out.println(list.size());
+
+        return null;
     }
 
     /**
