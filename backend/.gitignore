@@ -39,3 +39,9 @@ build/
 
 ### Mac OS ###
 .DS_Store
+.claude
+
+### 敏感配置 (ES 连接密码等，切勿提交) ###
+data/esConnectParam*.json
+data/*.local.json
+
