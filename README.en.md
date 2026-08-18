@@ -96,7 +96,7 @@ Edit `backend/data/esConnectParam.json`:
 
 > Main menu
 >
-> ![main-menu](image/image-20241016164954152.png)
+> ![image-20260818172104017](image/image-20260818172104017.png)
 
 ## 🐳 Docker
 
