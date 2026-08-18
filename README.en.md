@@ -1,8 +1,10 @@
-# ES Tool 🛠️ — A Multi-Version Elasticsearch GUI
+# ES Tool 🛠️ — Elasticsearch GUI for ES 7/8/9 (Multi-Version Visual Management Tool)
 
 English | [中文](./README.md)
 
-> Manage **ES 7.x / 8.x / 9.x** clusters from one UI: indices, docs, aliases, templates, analyzers, HTTP debugging, data migration — with a built-in **AI assistant** that writes DSL for you.
+> An open-source **Elasticsearch visualization and management platform** that handles **ES 7.x / 8.x / 9.x** clusters from a single UI: index, document, alias, template, analyzer management, HTTP debugging, cross-cluster data migration — with a built-in **AI assistant** that turns natural language into DSL. A lightweight alternative to Kibana / Cerebro / elasticsearch-head.
+
+**Keywords**: Elasticsearch GUI · ES visualization tool · Elasticsearch client · ES 7/8/9 multi-version management · Elasticsearch admin tool · DSL debugging · data migration · Spring Boot + Vue
 
 ## ✨ Highlights
 

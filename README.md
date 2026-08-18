@@ -1,8 +1,10 @@
-# ES Tool 🛠️ - Elasticsearch 多版本可视化运维平台
+# ES Tool 🛠️ - Elasticsearch 可视化管理工具 (ES 7/8/9 多版本 GUI)
 
 [English](./README.en.md) | 中文
 
-> 一站式管理 Elasticsearch **7.x / 8.x / 9.x** 集群：索引、文档、别名、模板、分词、HTTP 调试、数据迁移，内置 **AI 助手**帮你写 DSL。
+> 一个开源的 **Elasticsearch 可视化运维平台**，用一套界面同时管理 **ES 7.x / 8.x / 9.x** 多版本集群：索引管理、文档操作、别名、模板、分词分析、HTTP 调试、数据迁移，内置 **AI 助手**帮你把自然语言转成 DSL。可作为 Kibana / Cerebro / elasticsearch-head 的轻量替代方案。
+
+**关键词**: Elasticsearch GUI · ES 可视化工具 · Elasticsearch 客户端 · ES 7/8/9 多版本管理 · ES 运维平台 · DSL 调试 · 数据迁移 · Spring Boot + Vue
 
 ## ✨ 项目亮点
 
