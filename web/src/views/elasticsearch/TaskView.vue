@@ -1,139 +1,122 @@
 <template>
-    <div>
-        <el-button @click="refreshList">查询</el-button>
-        <el-table ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%"
-                  @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="55">
-            </el-table-column>
-            <!-- <el-table-column label="日期" width="120">
-                <template slot-scope="scope">{{ scope.row.date }}</template>
-            </el-table-column> -->
-            <el-table-column prop="task_id" label="任务Id" >
-            </el-table-column>
-            <el-table-column prop="type" label="类型">
-            </el-table-column>
-            <el-table-column prop="start_time" label="启动时间">
-            </el-table-column>
-            <el-table-column prop="running_time" label="运行时间">
-            </el-table-column>
-            <el-table-column prop="ip" label="地址">
-            </el-table-column>
-            <el-table-column fixed="right" label="操作">
-                <template slot-scope="scope">
-                    <el-button @click="stopTask(scope.row)" type="text" size="medium">停止任务</el-button>
-                </template>
-            </el-table-column>
-            <el-table-column fixed="right" label="操作">
-                <template slot-scope="scope">
-                    <el-button @click="taskInfo(scope.row)" type="text" size="medium">查看详情</el-button>
-                </template>
-            </el-table-column>
-        </el-table>
-        <!-- 右侧滑出的抽屉 -->
-        <el-drawer
-            title="任务详情"
-            :visible.sync="drawerVisible"
-            direction="rtl"
-            size="30%">
-            <pre>{{ formattedInfo }}</pre>
-        </el-drawer>
+  <div>
+    <!-- 工具栏 -->
+    <div class="app-toolbar">
+      <div class="app-toolbar-left">
+        <h3 class="page-title">任务列表</h3>
+        <el-button type="primary" icon="el-icon-refresh" @click="refreshList">查询</el-button>
+      </div>
     </div>
+
+    <!-- 表格 -->
+    <el-table
+      ref="multipleTable"
+      :data="tableData"
+      tooltip-effect="dark"
+      stripe
+      highlight-current-row
+      class="app-table"
+      style="width: 100%"
+      @selection-change="handleSelectionChange"
+    >
+      <el-table-column type="selection" width="55"></el-table-column>
+      <el-table-column prop="task_id" label="任务Id" min-width="120" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="type" label="类型" min-width="120"></el-table-column>
+      <el-table-column prop="start_time" label="启动时间" min-width="160"></el-table-column>
+      <el-table-column prop="running_time" label="运行时间" min-width="120"></el-table-column>
+      <el-table-column prop="ip" label="地址" min-width="140"></el-table-column>
+      <el-table-column label="操作" width="180" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="text" icon="el-icon-video-pause" @click="stopTask(scope.row)">停止任务</el-button>
+          <el-divider direction="vertical"></el-divider>
+          <el-button type="text" icon="el-icon-view" @click="taskInfo(scope.row)">查看详情</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- 任务详情抽屉 -->
+    <el-drawer title="任务详情" :visible.sync="drawerVisible" direction="rtl" size="40%">
+      <div style="padding: 20px">
+        <pre class="json-pre">{{ formattedInfo }}</pre>
+      </div>
+    </el-drawer>
+  </div>
 </template>
 
 <script>
 export default {
-    props: {
-        connectParam: Object,
+  props: { connectParam: Object },
+  data() {
+    return {
+      tableData: [],
+      multipleSelection: [],
+      operationCategory: "TASK",
+      drawerVisible: false,
+      info: {}
+    }
+  },
+  computed: {
+    formattedInfo() {
+      return JSON.stringify(this.info, null, 2);
+    }
+  },
+  methods: {
+    handleSelectionChange(val) {
+      this.multipleSelection = val.map(el => el.index);
     },
-    data() {
-        return {
-            tableData: [],
-            multipleSelection: [],
-            operationCategory: "TASK",
-            drawerVisible: false,
-            info: {}
-        }
+    refreshList() {
+      this.fetchData();
     },
-    computed: {
-        // 格式化 JSON 数据以便在弹窗中展示
-        formattedInfo() {
-            return JSON.stringify(this.info, null, 2);
-        }
+    getParams(operationType) {
+      return { ...this.connectParam, operationCategory: this.operationCategory, operationType };
     },
-    methods: {
-        handleSelectionChange(val) {
-            this.multipleSelection = [];
-            val.forEach(element => {
-                this.multipleSelection.push(element.index)
-            });
-        },
-
-        refreshList() {
-            // 执行刷新列表的操作
-            this.fetchData();
-        },
-
-        getParams(operationType) {
-            const params = this.connectParam
-            params.operationCategory = this.operationCategory
-            params.operationType = operationType
-            return params
-        },
-
-        async fetchData() {
-            // 假设使用axios发起请求获取数据
-
-            try {
-                const params = this.getParams("LIST")
-                const response = await this.axios.post('/api/elasticsearch/operation', params);
-                this.tableData = response.data.data
-                console.log(this.tableData)
-            } catch (error) {
-                console.log(error)
-            }
-
-
-        },
-
-        stopTask(row) {
-            console.log(row)
-            this.$confirm('此操作将取消任务 是否继续?', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-            }).then(async () => {
-                const params = this.getParams("PUT")
-                params.taskId = row.task_id
-                const response = await this.axios.post('/api/elasticsearch/operation', params);
-                this.$message({
-                    message: response.data.message,
-                    type: 'success'
-                });
-                this.refreshList()
-
-            }).catch((error) => {
-                console.log(error)
-            });
-        },
-        async taskInfo(row) {
-            // 假设使用axios发起请求获取数据
-
-            try {
-                const params = this.getParams("INFO")
-                params.taskId = row.task_id
-                const response = await this.axios.post('/api/elasticsearch/operation', params);
-                this.info = response.data.data
-                this.drawerVisible = true;  // 打开弹窗
-            } catch (error) {
-                console.log(error)
-            }
-        },
-        handleDialogClose() {
-            this.info = {};  // 清空 info 数据
-        }
+    async fetchData() {
+      try {
+        const params = this.getParams("LIST");
+        const response = await this.axios.post('/api/elasticsearch/operation', params);
+        this.tableData = response.data.data || [];
+      } catch (error) {
+        console.log(error);
+      }
     },
-    // mounted() {
-    //     this.refreshList()
-    // }
+    stopTask(row) {
+      this.$confirm('此操作将取消任务，是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const params = this.getParams("PUT");
+        params.taskId = row.task_id;
+        const response = await this.axios.post('/api/elasticsearch/operation', params);
+        this.$message({ message: response.data.message, type: 'success' });
+        this.refreshList();
+      }).catch(() => {});
+    },
+    async taskInfo(row) {
+      try {
+        const params = this.getParams("INFO");
+        params.taskId = row.task_id;
+        const response = await this.axios.post('/api/elasticsearch/operation', params);
+        this.info = response.data.data;
+        this.drawerVisible = true;
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }
 }
 </script>
+
+<style lang="scss" scoped>
+.json-pre {
+  background: #f5f7fa;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+</style>
